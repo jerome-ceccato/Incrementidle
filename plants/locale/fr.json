@@ -1,0 +1,71 @@
+{
+	"resources": {
+		"seed": {
+			"displayName": "Graines",
+			"displayNameSingle": "Graine",
+			"description": "Toutes les plantes naissent de graines."
+			},
+
+		"nutriment": {
+			"displayName": "Nutriments",
+			"displayNameSingle": "Nutriment",
+			"description": "Un élément nécessaire à la survie de toutes les plantes."
+			},
+
+		"water": {
+			"displayName": "Eau",
+			"displayNameSingle": "Eau",
+			"description": "Les plantes sont composées en grande partie d'eau."
+			},
+
+		"discovery": {
+			"displayName": "Points de découverte",
+			"displayNameSingle": "Point de découverte",
+			"description": "Il semble que certaines de vos plantes souhaitent découvrir le monde qui les entoure !"
+		}
+	},
+
+	"units": {
+		"plant": {
+			"displayName": "Plantes",
+			"displayNameSingle": "Plante",
+			"description": "Une plante de base."
+		},
+
+		"root": {
+			"displayName": "Racines",
+			"displayNameSingle": "Racine",
+			"description": "Les racines sont capables d'extraire les nutriments du sol."
+		},
+
+		"fern": {
+			"displayName": "Fougères",
+			"displayNameSingle": "Fougère",
+			"description": "Les fougères produisent de l'eau. Ne me demandez pas comment."
+		},
+
+		"plantation": {
+			"displayName": "Plantations",
+			"displayNameSingle": "Plantation",
+			"description": "Un champ de plante. Qui génère des plantes. Enfin, qui transforme des graines en plantes."
+		},
+
+		"tree": {
+			"displayName": "Arbres",
+			"displayNameSingle": "Arbre",
+			"description": "L'abre produit des racines qui ramassent des nutriments."
+		},
+
+		"swamp": {
+			"displayName": "Marécages",
+			"displayNameSingle": "Marécage",
+			"description": "La fougère génère de l'eau et les marécages génèrent des fougères. C'est pourtant logique, non ?"
+		},
+
+		"ivy": {
+			"displayName": "Lierres",
+			"displayNameSingle": "Lierre",
+			"description": "En combinant des graines, on peut créer du Lierre : une plante grimpante qui aime se faufiler partout afin de décourir le monde. Le lierre est une sorte de plante exploratrice si on veut."
+		}
+	}
+}

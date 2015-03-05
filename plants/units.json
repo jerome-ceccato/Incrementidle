@@ -1,0 +1,197 @@
+{
+	"plant": {
+		"type": "unit",
+		"cost": [{
+			"resource": "seed",
+			"amount": 1,
+			}],
+
+		"generates": [{
+			"resource": "seed",
+			"amount": 0.1
+			}],
+	},
+
+	"root": {
+		"type": "unit",
+		"cost": [{
+			"resource": "seed",
+			"amount": 1
+			}],
+
+		"generates": [{
+			"resource": "nutriment",
+			"amount": 1
+			}],
+
+		"preReq": [{
+			"type": "ownUnit",
+			"unit": "plant",
+			"amount": 1
+			}]
+		},
+
+	"fern": {
+		"type": "unit",
+		"cost": [{
+			"resource": "seed",
+			"amount": 1
+			}, {
+			"resource": "nutriment",
+			"amount": 20
+			}],
+
+		"generates": [{
+			"resource": "water",
+			"amount": 1
+			}],
+
+		"preReq": [{
+			"type": "ownUnit",
+			"unit": "root",
+			"amount": 2
+			}]
+	},
+
+	"plantation": {
+		"type": "building",
+		"cost": [{
+			"unit": "plant",
+			"amount": 10,
+			"multiplier": 1.3
+			}, {
+			"resource": "nutriment",
+			"amount": 100,
+			"multiplier": 1.3
+			}, {
+			"resource": "water",
+			"amount": 100,
+			"multiplier": 1.3
+			}],
+
+		"generates": [{
+			"unit": "plant",
+			"amount": 1
+			}, {
+			"resource": "seed",
+			"amount": -1
+			}],
+
+		"preReq": [{
+			"type": "ownUnit",
+			"unit": "root",
+			"amount": 10
+			}, {
+			"type": "ownUnit",
+			"unit": "fern",
+			"amount": 10
+			}, {
+			"type": "ownUnit",
+			"unit": "plant",
+			"amount": 50
+			}]
+	},
+
+	"tree": {
+		"type": "building",
+		"cost": [{
+			"resource": "seed",
+			"amount": 1
+			}, {
+			"resource": "nutriment",
+			"amount": 500,
+			"multiplier": 1.2
+			}, {
+			"resource": "water",
+			"amount": 100,
+			"multiplier": 1.2
+			}],
+
+		"generates": [{
+			"unit": "root",
+			"amount": 1
+			}, {
+			"resource": "seed",
+			"amount": -1
+			}],
+
+		"preReq": [{
+			"type": "ownUnit",
+			"unit": "root",
+			"amount": 50
+			}, {
+			"type": "ownUnit",
+			"unit": "fern",
+			"amount": 10
+			}, {
+			"type": "ownUnit",
+			"unit": "plant",
+			"amount": 10
+			}]
+	},
+
+	"swamp": {
+		"type": "building",
+		"cost": [{
+			"resource": "seed",
+			"amount": 1
+			}, {
+			"resource": "nutriment",
+			"amount": 100,
+			"multiplier": 1.2
+			}, {
+			"resource": "water",
+			"amount": 500,
+			"multiplier": 1.2
+			}],
+
+		"generates": [{
+			"unit": "fern",
+			"amount": 1
+			}, {
+			"resource": "seed",
+			"amount": -1
+			}],
+
+		"preReq": [{
+			"type": "ownUnit",
+			"unit": "root",
+			"amount": 10
+			}, {
+			"type": "ownUnit",
+			"unit": "fern",
+			"amount": 50
+			}, {
+			"type": "ownUnit",
+			"unit": "plant",
+			"amount": 10
+			}]
+	},
+
+	"ivy": {
+		"type": "unit",
+		"cost": [{
+			"resource": "seed",
+			"amount": 100
+			}],
+
+		"generates": [{
+			"resource": "discovery",
+			"amount": 1
+			}],
+
+		"preReq": [{
+			"type": "ownUnit",
+			"unit": "tree",
+			"amount": 1
+			}, {
+			"type": "ownUnit",
+			"unit": "swamp",
+			"amount": 1
+			} {
+			"type": "ownUnit",
+			"unit": "plantation",
+			"amount": 1
+			}]
+	},
+}
