@@ -1,0 +1,16 @@
+{
+	"scienceInstitute": {
+		"type": "once",
+		"cost": [{
+			"resource": "discovery",
+			"amount": 1000
+		}, {
+			"resource": "tree",
+			"amount": 1
+			}],
+		"preReq": [{
+			"resource": "ivy",
+			"amount": 1
+		}]
+	}
+}

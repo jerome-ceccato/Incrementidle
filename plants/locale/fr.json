@@ -67,5 +67,12 @@
 			"displayNameSingle": "Lierre",
 			"description": "En combinant des graines, on peut créer du Lierre : une plante grimpante qui aime se faufiler partout afin de décourir le monde. Le lierre est une sorte de plante exploratrice si on veut."
 		}
+	},
+
+	"upgrades": {
+		"scienceInstitute": {
+			"displayName": "Institution scientifique des plantes et végétaux unis",
+			"description": "Il semblerait que les plantes aient formé une sorte d'institution scientifique."
+		}
 	}
 }

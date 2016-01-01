@@ -188,7 +188,7 @@
 			"type": "ownUnit",
 			"unit": "swamp",
 			"amount": 1
-			} {
+			}, {
 			"type": "ownUnit",
 			"unit": "plantation",
 			"amount": 1
