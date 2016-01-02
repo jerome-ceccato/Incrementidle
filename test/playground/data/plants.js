@@ -214,7 +214,8 @@ gameContent.plants = {
 				"amount": 1
 			}],
 			"preReq": [{
-				"resource": "ivy",
+				"type": "ownUnit",
+				"unit": "ivy",
 				"amount": 1
 			}]
 		}

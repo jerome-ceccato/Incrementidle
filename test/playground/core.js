@@ -6,6 +6,10 @@ var engine = new function() {
 		return 'fr';
 	};
 
+	this.selectedBuyQuantity = function() {
+		return 1;
+	};
+
 	this.start = function() {
 		this.game = new Game(new Race('plants', gameContent.plants));
 		this.game.buildTables();

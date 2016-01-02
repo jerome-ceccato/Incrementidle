@@ -27,14 +27,14 @@ function Game(race) {
 				var td = document.createElement('td');
 				if (ntr == 0) {
 					var button = document.createElement('button');
-					var buttonContent = document.createTextNode(this.race.localizedName(type, data[ntd].name));
+					var buttonContent = document.createTextNode('?');
 					button.appendChild(buttonContent);
 					button.id = this.identifierForNode(type, ntd, 'button');
 
 					(function(race, entity, type, button) {
 						button.onclick = function() {
 							console.log(button.id);
-							if (race.tryBuy(entity, type)) {
+							if (race.tryBuy(entity, type, engine.selectedBuyQuantity())) {
 								engine.refresh();
 							}
 						};
@@ -42,7 +42,7 @@ function Game(race) {
 
 					td.appendChild(button);
 				} else {
-					var text = document.createTextNode(data[ntd].owned.toString())
+					var text = document.createTextNode('?')
 					td.id = this.identifierForNode(type, ntd, 'text');
 					td.appendChild(text);
 				}
@@ -56,8 +56,14 @@ function Game(race) {
 	this.refreshTable = function() {
 		var refreshSingleTable = function(self, data, type) {
 			for (var ntd = 0; ntd < data.length; ntd++) {
-				$('#' + self.identifierForNode(type, ntd, 'text')).html(data[ntd].owned.toString());
-				$('#' + self.identifierForNode(type, ntd, 'button')).prop('disabled', !self.race.canAfford(data[ntd], type));
+				var value = $('#' + self.identifierForNode(type, ntd, 'text'));
+				var button = $('#' + self.identifierForNode(type, ntd, 'button'));
+
+				value.html(data[ntd].owned.floor().toString());
+
+				var shouldReveal = self.race.shouldReveal(data[ntd], type);
+				button.prop('disabled', !shouldReveal || !self.race.canAfford(data[ntd], type, engine.selectedBuyQuantity()));
+				button.text(shouldReveal ? self.race.localizedName(data[ntd].name, type) : '  ?  ')
 			}
 		};
 
@@ -67,7 +73,7 @@ function Game(race) {
 	};
 
 	this.tick = function() {
-		this.race.resources[0].owned = this.race.resources[0].owned.add(1);
+		this.race.tick(1);
 	};
 
 	this.mainButtonPressed = function() {
