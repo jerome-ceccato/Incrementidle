@@ -42,7 +42,7 @@ function Game(race) {
 
 					td.appendChild(button);
 				} else {
-					var text = document.createTextNode(data[ntd].owned)
+					var text = document.createTextNode(data[ntd].owned.toString())
 					td.id = this.identifierForNode(type, ntd, 'text');
 					td.appendChild(text);
 				}
@@ -56,7 +56,7 @@ function Game(race) {
 	this.refreshTable = function() {
 		var refreshSingleTable = function(self, data, type) {
 			for (var ntd = 0; ntd < data.length; ntd++) {
-				$('#' + self.identifierForNode(type, ntd, 'text')).html(data[ntd].owned);
+				$('#' + self.identifierForNode(type, ntd, 'text')).html(data[ntd].owned.toString());
 				$('#' + self.identifierForNode(type, ntd, 'button')).prop('disabled', !self.race.canAfford(data[ntd], type));
 			}
 		};
@@ -67,10 +67,10 @@ function Game(race) {
 	};
 
 	this.tick = function() {
-		this.race.resources[0].owned++;
+		this.race.resources[0].owned = this.race.resources[0].owned.add(1);
 	};
 
 	this.mainButtonPressed = function() {
-		this.race.resources[0].owned++;
+		this.race.resources[0].owned = this.race.resources[0].owned.add(1);
 	};
 };

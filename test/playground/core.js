@@ -1,6 +1,5 @@
 var engine = new function() {
 
-	this.gold = 0;
 	this.game = undefined;
 
 	this.currentLocale = function() {
@@ -10,6 +9,7 @@ var engine = new function() {
 	this.start = function() {
 		this.game = new Game(new Race('plants', gameContent.plants));
 		this.game.buildTables();
+		this.refresh();
 
 		window.setInterval(function() {
 			engine.update();

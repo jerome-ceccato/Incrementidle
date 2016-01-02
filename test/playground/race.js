@@ -2,21 +2,21 @@ function RaceResource(name, content) {
 	this.name = name;
 	this.key = name;
 	this.content = content;
-	this.owned = 0;
+	this.owned = new BigNumber(0);
 };
 
 function RaceUnit(name, content) {
 	this.name = name;
 	this.key = name;
 	this.content = content;
-	this.owned = 0;
+	this.owned = new BigNumber(0);
 };
 
 function RaceUpgrade(name, content) {
 	this.name = name;
 	this.key = name;
 	this.content = content;
-	this.owned = 0;
+	this.owned = new BigNumber(0);
 };
 
 function Race(name, content) {
@@ -71,7 +71,7 @@ function Race(name, content) {
 	};
 
 	this.offsetOwnedEntity = function(name, offset) {
-		this.globalLookupTable[name].owned += offset;
+		this.globalLookupTable[name].owned = this.globalLookupTable[name].owned.add(offset);
 		return this.globalLookupTable[name].owned;
 	};
 
@@ -82,9 +82,9 @@ function Race(name, content) {
 			if (data.content.cost !== undefined) {
 				for (var i = 0; i < data.content.cost.length; i++) {
 					var cost = data.content.cost[i];
-					if (cost.resource !== undefined && this.resourcesLookupTable[cost.resource].owned < cost.amount) {
+					if (cost.resource !== undefined && this.resourcesLookupTable[cost.resource].owned.lessThan(cost.amount)) {
 						return false;
-					} else if (cost.unit !== undefined && this.unitsLookupTable[cost.unit].owned < cost.amount) {
+					} else if (cost.unit !== undefined && this.unitsLookupTable[cost.unit].owned.lessThan(cost.amount)) {
 						return false;
 					}
 				}
@@ -99,9 +99,9 @@ function Race(name, content) {
 				for (var i = 0; i < data.content.cost.length; i++) {
 					var cost = data.content.cost[i];
 					if (cost.resource !== undefined) {
-						this.resourcesLookupTable[cost.resource].owned -= cost.amount;
+						this.resourcesLookupTable[cost.resource].owned = this.resourcesLookupTable[cost.resource].owned.sub(cost.amount);
 					} else if (cost.unit !== undefined) {
-						this.unitsLookupTable[cost.unit].owned -= cost.amount;
+						this.unitsLookupTable[cost.unit].owned = this.unitsLookupTable[cost.unit].owned.sub(cost.amount);
 					}
 				}
 			}
