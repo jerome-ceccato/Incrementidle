@@ -59,11 +59,11 @@ function Game(race) {
 				var value = $('#' + self.identifierForNode(type, ntd, 'text'));
 				var button = $('#' + self.identifierForNode(type, ntd, 'button'));
 
-				value.html(data[ntd].owned.floor().toString());
+				value.html(data[ntd].ownedDisplayString());
 
 				var shouldReveal = self.race.shouldReveal(data[ntd], type);
 				button.prop('disabled', !shouldReveal || !self.race.canAfford(data[ntd], type, engine.selectedBuyQuantity()));
-				button.text(shouldReveal ? self.race.localizedName(data[ntd].name, type) : '  ?  ')
+				button.text(shouldReveal ? data[ntd].nameDisplayString() : '  ?  ')
 			}
 		};
 

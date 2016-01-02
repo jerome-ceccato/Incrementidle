@@ -210,7 +210,7 @@ gameContent.plants = {
 				"resource": "discovery",
 				"amount": 1000
 			}, {
-				"resource": "tree",
+				"unit": "tree",
 				"amount": 1
 			}],
 			"preReq": [{

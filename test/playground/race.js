@@ -1,22 +1,52 @@
-function RaceResource(name, content) {
+function RaceResource(name, content, raceOwner) {
+	this.raceOwner = raceOwner;
 	this.name = name;
 	this.key = name;
 	this.content = content;
 	this.owned = new BigNumber(0);
+
+	this.ownedDisplayString = function() {
+		return this.owned.floor().toString();
+	};
+
+	this.nameDisplayString = function() {
+		return this.raceOwner.localizedName(this.name, 'resources', this.owned);
+	}
 };
 
-function RaceUnit(name, content) {
+function RaceUnit(name, content, raceOwner) {
+	this.raceOwner = raceOwner;
 	this.name = name;
 	this.key = name;
 	this.content = content;
 	this.owned = new BigNumber(0);
+	this.type = content.type;
+
+	this.ownedDisplayString = function() {
+		return this.owned.floor().toString();
+	};
+
+	this.nameDisplayString = function() {
+		var name = this.raceOwner.localizedName(this.name, 'units', this.owned);
+		return this.type == 'unit' ? name : '[' + name + ']';
+	}
 };
 
-function RaceUpgrade(name, content) {
+function RaceUpgrade(name, content, raceOwner) {
+	this.raceOwner = raceOwner;
 	this.name = name;
 	this.key = name;
 	this.content = content;
 	this.owned = new BigNumber(0);
+	this.type = content.type;
+
+	this.ownedDisplayString = function() {
+		return this.owned.greaterThan(0) ? 'yes' : 'no';
+	};
+
+	this.nameDisplayString = function() {
+		return this.raceOwner.localizedName(this.name, 'upgrades', this.owned);
+	}
 };
 
 function Race(name, content) {
@@ -32,10 +62,12 @@ function Race(name, content) {
 	this.unitsLookupTable = {};
 	this.upgradesLookupTable = {};
 
+	this.unlocked = {};
+
 	this.init = function () {
 		for (key in this.content.resources) {
 			if (this.content.resources.hasOwnProperty(key)) {
-				var resource = new RaceResource(key, this.content.resources[key]);
+				var resource = new RaceResource(key, this.content.resources[key], this);
 				this.resources.push(resource);
 				this.resourcesLookupTable[resource.name] = resource;
 				this.globalLookupTable[resource.name] = resource; 
@@ -44,7 +76,7 @@ function Race(name, content) {
 
 		for (key in this.content.units) {
 			if (this.content.units.hasOwnProperty(key)) {
-				var unit = new RaceUnit(key, this.content.units[key]);
+				var unit = new RaceUnit(key, this.content.units[key], this);
 				this.units.push(unit);
 				this.unitsLookupTable[unit.name] = unit;
 				this.globalLookupTable[unit.name] = unit;
@@ -53,7 +85,7 @@ function Race(name, content) {
 
 		for (key in this.content.upgrades) {
 			if (this.content.upgrades.hasOwnProperty(key)) {
-				var upgrade = new RaceUpgrade(key, this.content.upgrades[key]);
+				var upgrade = new RaceUpgrade(key, this.content.upgrades[key], this);
 				this.upgrades.push(upgrade);
 				this.upgradesLookupTable[upgrade.name] = upgrade;
 				this.globalLookupTable[upgrade.name] = upgrade;
@@ -74,8 +106,12 @@ function Race(name, content) {
 		return this.content.locale[engine.currentLocale()][type][key];
 	};
 
-	this.localizedName = function(key, type) {
-		return this.localizationData(key, type).displayName;
+	this.localizedName = function(key, type, quantity) {
+		var data = this.localizationData(key, type);
+		if ((quantity === undefined || quantity.lessThan(2)) && data.displayNameSingle !== undefined) {
+			return data.displayNameSingle;
+		}
+		return data.displayName;
 	};
 
 	this.getOwnedEntity = function(name) {
@@ -88,8 +124,12 @@ function Race(name, content) {
 	};
 
 	this.shouldReveal = function(data, type) {
+		if (this.unlocked[data.name]) {
+			return true;
+		}
 		var entity = this.globalLookupTable[data.name];
 		if (entity.owned.greaterThan(0)) {
+			this.unlocked[data.name] = true;
 			return true;
 		} else if (entity.content.preReq !== undefined) {
 			for (var i = 0; i < entity.content.preReq.length; i++) {
@@ -104,7 +144,10 @@ function Race(name, content) {
 					console.log('unknown requirement ' + requirement.type);
 				}
 			}
+		} else if (type == 'resources') {
+			return false;
 		}
+		this.unlocked[data.name] = true;
 		return true;
 	};
 
@@ -115,6 +158,14 @@ function Race(name, content) {
 	this.canAfford = function(data, type, quantity) {
 		switch (type) {
 			case 'resources': return false;
+			case 'upgrades':
+				if (this.upgradesLookupTable[data.name].type == 'once') {
+					if (this.upgradesLookupTable[data.name].owned.greaterThan(0)) {
+						return false;
+					} else {
+						quantity = 1;
+					}
+				}
 			default:
 			if (data.content.cost !== undefined) {
 				for (var i = 0; i < data.content.cost.length; i++) {
@@ -139,6 +190,9 @@ function Race(name, content) {
 
 	this.tryBuy = function(data, type, quantity) {
 		if (this.canAfford(data, type, quantity)) {
+			if (type == 'upgrades' && this.upgradesLookupTable[data.name].type == 'once') {
+				quantity = 1;
+			}
 			if (data.content.cost !== undefined) {
 				for (var i = 0; i < data.content.cost.length; i++) {
 					var cost = data.content.cost[i];
@@ -157,7 +211,7 @@ function Race(name, content) {
 	}
 
 	this.maxGeneratable = function(cost, quantity) {
-		amount = new BigNumber(cost.amount).abs().times(quantity);
+		amount = new BigNumber(cost.amount).abs();
 		if (cost.resource !== undefined) {
 			return BigNumber.min(quantity, this.resourcesLookupTable[cost.resource].owned.div(amount));
 		} else if (cost.unit !== undefined) {
@@ -183,16 +237,13 @@ function Race(name, content) {
 				var entity = this.globalLookupTable[key];
 				if (entity.content.generates !== undefined) {
 					if (this.globalLookupTable[entity.name].owned.greaterThan(0)) {
-						console.log('i have ' + this.globalLookupTable[entity.name].owned + ' ' + this.localizedName(entity.name))
 						var max = this.maxCanGenerate(entity, ticks);
 						for (var i = 0; i < entity.content.generates.length; i++) {
 							var generated = entity.content.generates[i];
 							var amount = new BigNumber(generated.amount).times(max);
 							if (generated.resource !== undefined) {
-								console.log('can generate ' + amount + ' ' + generated.resource);
 								this.offsetOwnedEntity(generated.resource, amount);
 							} else if (generated.unit !== undefined) {
-								console.log('can generate ' + amount + ' ' + generated.unit);
 								this.offsetOwnedEntity(generated.unit, amount);
 							}
 						}
