@@ -31,19 +31,18 @@ function Game(race) {
 					button.appendChild(buttonContent);
 					button.id = this.identifierForNode(type, ntd, 'button');
 
-					(function(entity, button) {
+					(function(race, entity, type, button) {
 						button.onclick = function() {
 							console.log(button.id);
-							console.log(entity);
-							entity.user++;
-							console.log(entity.user);
-							engine.refresh();
+							if (race.tryBuy(entity, type)) {
+								engine.refresh();
+							}
 						};
-					})(data[ntd], button);
+					})(this.race, data[ntd], type, button);
 
 					td.appendChild(button);
 				} else {
-					var text = document.createTextNode(data[ntd].user)
+					var text = document.createTextNode(data[ntd].owned)
 					td.id = this.identifierForNode(type, ntd, 'text');
 					td.appendChild(text);
 				}
@@ -57,12 +56,21 @@ function Game(race) {
 	this.refreshTable = function() {
 		var refreshSingleTable = function(self, data, type) {
 			for (var ntd = 0; ntd < data.length; ntd++) {
-				$('#' + self.identifierForNode(type, ntd, 'text')).html(data[ntd].user);
+				$('#' + self.identifierForNode(type, ntd, 'text')).html(data[ntd].owned);
+				$('#' + self.identifierForNode(type, ntd, 'button')).prop('disabled', !self.race.canAfford(data[ntd], type));
 			}
 		};
 
 		refreshSingleTable(this, this.race.resources, 'resources');
 		refreshSingleTable(this, this.race.units, 'units');
 		refreshSingleTable(this, this.race.upgrades, 'upgrades');
+	};
+
+	this.tick = function() {
+		this.race.resources[0].owned++;
+	};
+
+	this.mainButtonPressed = function() {
+		this.race.resources[0].owned++;
 	};
 };

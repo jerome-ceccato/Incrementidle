@@ -17,17 +17,16 @@ var engine = new function() {
 	};
 
 	this.update = function() {
-		this.gold++;
+		this.game.tick();
 		this.refresh();
 	};
 
 	this.refresh = function() {
-		$('#gold').text(this.gold);
 		this.game.refreshTable();
 	};
 
-	this.addOne = function() {
-		this.gold++;
+	this.mainButtonPressed = function() {
+		this.game.mainButtonPressed();
 		this.refresh();
 	};
 };
