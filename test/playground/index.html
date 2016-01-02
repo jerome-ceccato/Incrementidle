@@ -1,17 +1,23 @@
 <!DOCTYPE html>
 <html>
 <head>
+	<meta charset="UTF-8">
+	<script src="lib/jquery-2.1.4.js"></script>
 	<script src="data/plants.js"></script>
 	<script src="utils.js"></script>
+	<script src="race.js"></script>
 	<script src="game.js"></script>
 	<script src="core.js"></script>
 	<title>test</title>
 </head>
 <body>
 	<h1>Playground</h1>
-	<h2 id="gold" bind="textContent:gold">0</h2>
+	<h2 id="gold">0</h2>
 	<br/>
 	<button onclick="engine.addOne()">Click to add 1</button>
+	<br/><br/>
+	<table border="1" id="table_resources"></table>
+	<table border="1" id="table_units"></table>
+	<table border="1" id="table_upgrades"></table>
 </body>
-<script type="text/javascript">engine.start();</script>
 </html>
