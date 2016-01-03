@@ -6,7 +6,7 @@ function RaceResource(name, content, raceOwner) {
 	this.owned = new BigNumber(0);
 
 	this.costForCurrentOwnedAmount = function(cost) {
-		return new BigNumber(cost.amount); // TODO
+		return new BigNumber(cost.amount).times(new BigNumber(1.1).pow(this.owned)); // TODO
 	};
 
 	this.ownedDisplayString = function() {
@@ -26,7 +26,7 @@ function RaceResource(name, content, raceOwner) {
 					if (displayString.length > 0) {
 						displayString += ', ';
 					}
-					var totalCost = entity.costForCurrentOwnedAmount(this.content.cost[i]);
+					var totalCost = this.costForCurrentOwnedAmount(this.content.cost[i]).ceil();
 					displayString += totalCost + ' ' + entity.nameDisplayString(totalCost);
 				}
 			}
@@ -51,7 +51,7 @@ function RaceUnit(name, content, raceOwner) {
 	this.type = content.type;
 
 	this.costForCurrentOwnedAmount = function(cost) {
-		return new BigNumber(cost.amount); // TODO
+		return new BigNumber(cost.amount).times(new BigNumber(1.1).pow(this.owned)); // TODO
 	};
 
 	this.ownedDisplayString = function() {
@@ -72,7 +72,7 @@ function RaceUnit(name, content, raceOwner) {
 					if (displayString.length > 0) {
 						displayString += ', ';
 					}
-					var totalCost = entity.costForCurrentOwnedAmount(this.content.cost[i]);
+					var totalCost = this.costForCurrentOwnedAmount(this.content.cost[i]).ceil();
 					displayString += totalCost + ' ' + entity.nameDisplayString(totalCost);
 				}
 			}
@@ -117,7 +117,7 @@ function RaceUpgrade(name, content, raceOwner) {
 					if (displayString.length > 0) {
 						displayString += ', ';
 					}
-					var totalCost = entity.costForCurrentOwnedAmount(this.content.cost[i]);
+					var totalCost = this.costForCurrentOwnedAmount(this.content.cost[i]).ceil();
 					displayString += totalCost + ' ' + entity.nameDisplayString(totalCost);
 				}
 			}
@@ -243,8 +243,14 @@ function Race(name, content) {
 		}
 	};
 
-	this.totalCostForObjects = function(cost, quantity) {
-		return new BigNumber(cost.amount).abs().times(quantity); // TODO formula
+	this.totalCostForObjects = function(cost, quantity, data) {
+		var entity = this.entityForCost(cost);
+		var initial = data.costForCurrentOwnedAmount(cost);
+
+		if (quantity == 1) {
+			return initial.ceil();
+		}
+		return initial.times(new BigNumber(1.1).pow(quantity).sub(1).div(new BigNumber(1.1 - 1))).ceil();
 	};
 
 	this.canAfford = function(data, type, quantity) {
@@ -261,7 +267,7 @@ function Race(name, content) {
 			default:
 			if (data.content.cost !== undefined) {
 				for (var i = 0; i < data.content.cost.length; i++) {
-					if (!this.canAffordSingle(data.content.cost[i], quantity)) {
+					if (!this.canAffordSingle(data.content.cost[i], quantity, data)) {
 						return false;
 					}
 				}
@@ -270,8 +276,8 @@ function Race(name, content) {
 		}
 	};
 
-	this.canAffordSingle = function(cost, quantity) {
-		var amount = this.totalCostForObjects(cost, quantity);
+	this.canAffordSingle = function(cost, quantity, data) {
+		var amount = this.totalCostForObjects(cost, quantity, data);
 		var entity = this.entityForCost(cost);
 		if (entity !== undefined && entity.owned.lessThan(amount)) {
 			return false;
@@ -287,7 +293,7 @@ function Race(name, content) {
 			if (data.content.cost !== undefined) {
 				for (var i = 0; i < data.content.cost.length; i++) {
 					var cost = data.content.cost[i];
-					var amount = this.totalCostForObjects(cost, quantity);
+					var amount = this.totalCostForObjects(cost, quantity, data);
 					var entity = this.entityForCost(cost);
 
 					if (entity !== undefined) {
