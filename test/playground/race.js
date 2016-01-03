@@ -5,13 +5,41 @@ function RaceResource(name, content, raceOwner) {
 	this.content = content;
 	this.owned = new BigNumber(0);
 
+	this.costForCurrentOwnedAmount = function(cost) {
+		return new BigNumber(cost.amount); // TODO
+	};
+
 	this.ownedDisplayString = function() {
 		return this.owned.floor().toString();
 	};
 
-	this.nameDisplayString = function() {
-		return this.raceOwner.localizedName(this.name, 'resources', this.owned);
+	this.nameDisplayString = function(amount) {
+		return this.raceOwner.localizedName(this.name, 'resources', (amount === undefined ? this.owned : amount));
 	}
+
+	this.costDisplayString = function() {
+		var displayString = '';
+		if (this.content.cost !== undefined) {
+			for (var i = 0; i < this.content.cost.length; i++) {
+				var entity = this.raceOwner.entityForCost(this.content.cost[i]);
+				if (entity !== undefined) {
+					if (displayString.length > 0) {
+						displayString += ', ';
+					}
+					var totalCost = entity.costForCurrentOwnedAmount(this.content.cost[i]);
+					displayString += totalCost + ' ' + entity.nameDisplayString(totalCost);
+				}
+			}
+		}
+		return displayString;
+	};
+
+	this.fullDisplayString = function() {
+		var cost = this.costDisplayString();
+		var name = this.nameDisplayString();
+
+		return cost.length > 0 ? name + ' (' + cost + ')' : name;
+	};
 };
 
 function RaceUnit(name, content, raceOwner) {
@@ -22,14 +50,42 @@ function RaceUnit(name, content, raceOwner) {
 	this.owned = new BigNumber(0);
 	this.type = content.type;
 
+	this.costForCurrentOwnedAmount = function(cost) {
+		return new BigNumber(cost.amount); // TODO
+	};
+
 	this.ownedDisplayString = function() {
 		return this.owned.floor().toString();
 	};
 
-	this.nameDisplayString = function() {
-		var name = this.raceOwner.localizedName(this.name, 'units', this.owned);
+	this.nameDisplayString = function(amount) {
+		var name = this.raceOwner.localizedName(this.name, 'units', (amount === undefined ? this.owned : amount));
 		return this.type == 'unit' ? name : '[' + name + ']';
 	}
+
+	this.costDisplayString = function() {
+		var displayString = '';
+		if (this.content.cost !== undefined) {
+			for (var i = 0; i < this.content.cost.length; i++) {
+				var entity = this.raceOwner.entityForCost(this.content.cost[i]);
+				if (entity !== undefined) {
+					if (displayString.length > 0) {
+						displayString += ', ';
+					}
+					var totalCost = entity.costForCurrentOwnedAmount(this.content.cost[i]);
+					displayString += totalCost + ' ' + entity.nameDisplayString(totalCost);
+				}
+			}
+		}
+		return displayString;
+	};
+
+	this.fullDisplayString = function() {
+		var cost = this.costDisplayString();
+		var name = this.nameDisplayString();
+
+		return cost.length > 0 ? name + ' (' + cost + ')' : name;
+	};
 };
 
 function RaceUpgrade(name, content, raceOwner) {
@@ -40,13 +96,41 @@ function RaceUpgrade(name, content, raceOwner) {
 	this.owned = new BigNumber(0);
 	this.type = content.type;
 
+	this.costForCurrentOwnedAmount = function(cost) {
+		return new BigNumber(cost.amount);
+	};
+
 	this.ownedDisplayString = function() {
 		return this.owned.greaterThan(0) ? 'yes' : 'no';
 	};
 
-	this.nameDisplayString = function() {
-		return this.raceOwner.localizedName(this.name, 'upgrades', this.owned);
+	this.nameDisplayString = function(amount) {
+		return this.raceOwner.localizedName(this.name, 'upgrades', (amount === undefined ? this.owned : amount));
 	}
+
+	this.costDisplayString = function() {
+		var displayString = '';
+		if (this.content.cost !== undefined) {
+			for (var i = 0; i < this.content.cost.length; i++) {
+				var entity = this.raceOwner.entityForCost(this.content.cost[i]);
+				if (entity !== undefined) {
+					if (displayString.length > 0) {
+						displayString += ', ';
+					}
+					var totalCost = entity.costForCurrentOwnedAmount(this.content.cost[i]);
+					displayString += totalCost + ' ' + entity.nameDisplayString(totalCost);
+				}
+			}
+		}
+		return displayString;
+	};
+
+	this.fullDisplayString = function() {
+		var cost = this.costDisplayString();
+		var name = this.nameDisplayString();
+
+		return cost.length > 0 ? name + ' (' + cost + ')' : name;
+	};
 };
 
 function Race(name, content) {
@@ -151,6 +235,14 @@ function Race(name, content) {
 		return true;
 	};
 
+	this.entityForCost = function(cost) {
+		if (cost.resource !== undefined) {
+			return this.resourcesLookupTable[cost.resource];
+		} else if (cost.unit !== undefined) {
+			return this.unitsLookupTable[cost.unit];
+		}
+	};
+
 	this.totalCostForObjects = function(cost, quantity) {
 		return new BigNumber(cost.amount).abs().times(quantity); // TODO formula
 	};
@@ -179,10 +271,9 @@ function Race(name, content) {
 	};
 
 	this.canAffordSingle = function(cost, quantity) {
-		amount = this.totalCostForObjects(cost, quantity);
-		if (cost.resource !== undefined && this.resourcesLookupTable[cost.resource].owned.lessThan(amount)) {
-			return false;
-		} else if (cost.unit !== undefined && this.unitsLookupTable[cost.unit].owned.lessThan(amount)) {
+		var amount = this.totalCostForObjects(cost, quantity);
+		var entity = this.entityForCost(cost);
+		if (entity !== undefined && entity.owned.lessThan(amount)) {
 			return false;
 		}
 		return true;
@@ -197,10 +288,10 @@ function Race(name, content) {
 				for (var i = 0; i < data.content.cost.length; i++) {
 					var cost = data.content.cost[i];
 					var amount = this.totalCostForObjects(cost, quantity);
-					if (cost.resource !== undefined) {
-						this.resourcesLookupTable[cost.resource].owned = this.resourcesLookupTable[cost.resource].owned.sub(amount);
-					} else if (cost.unit !== undefined) {
-						this.unitsLookupTable[cost.unit].owned = this.unitsLookupTable[cost.unit].owned.sub(amount);
+					var entity = this.entityForCost(cost);
+
+					if (entity !== undefined) {
+						entity.owned = entity.owned.sub(amount);
 					}
 				}
 			}
@@ -211,11 +302,11 @@ function Race(name, content) {
 	}
 
 	this.maxGeneratable = function(cost, quantity) {
-		amount = new BigNumber(cost.amount).abs();
-		if (cost.resource !== undefined) {
-			return BigNumber.min(quantity, this.resourcesLookupTable[cost.resource].owned.div(amount));
-		} else if (cost.unit !== undefined) {
-			return BigNumber.min(quantity, this.unitsLookupTable[cost.unit].owned.div(amount));
+		var amount = new BigNumber(cost.amount).abs();
+		var entity = this.entityForCost(cost);
+
+		if (entity !== undefined) {
+			return BigNumber.min(quantity, entity.owned.div(amount));
 		}
 		return quantity;
 	};

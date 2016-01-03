@@ -63,7 +63,7 @@ function Game(race) {
 
 				var shouldReveal = self.race.shouldReveal(data[ntd], type);
 				button.prop('disabled', !shouldReveal || !self.race.canAfford(data[ntd], type, engine.selectedBuyQuantity()));
-				button.text(shouldReveal ? data[ntd].nameDisplayString() : '  ?  ')
+				button.text(shouldReveal ? data[ntd].fullDisplayString() : '  ?  ')
 			}
 		};
 
