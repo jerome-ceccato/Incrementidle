@@ -66,7 +66,8 @@ gameContent.plants = {
 			"cost": [{
 				"unit": "plant",
 				"amount": 10,
-				"multiplier": 1.3
+				"multiplier": 1.3,
+				"curve": "linear"
 			}, {
 				"resource": "nutriment",
 				"amount": 100,

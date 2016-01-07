@@ -1,3 +1,127 @@
+var GameRace = {
+    resources: [],
+    units: [],
+    upgrades: [],
+    entitiesLookupTable: {},
+
+    create: function (name, content) {
+        return $.extend(Object.create(this), {
+            name: name,
+            content: content,
+            locale: Localization.create(content.locale.fr)
+        }).init();
+    },
+    
+    init: function () {
+        GameRaceInternals.pushContentInArray(this, this.resources, 'resources', GameResource);
+        GameRaceInternals.pushContentInArray(this, this.units, 'units', GameUnit);
+        GameRaceInternals.pushContentInArray(this, this.upgrades, 'upgrades', GameUpgrade);
+        GameRaceInternals.indexEntities(this.entitiesLookupTable, this.resources, this.units, this.upgrades);
+        return this;
+    },
+
+    getEntity: function (key) {
+        return this.entitiesLookupTable[key];
+    },
+
+    // Entity unlocking
+    unlockedEntities: {},
+    isEntityUnlocked: function (entity) {
+        return this.unlockedEntities.hasOwnProperty(entity.getIdentifier());
+    },
+    unlockEntity: function (entity) {
+        this.unlockedEntities[entity.getIdentifier()] = true;
+    },
+
+    meetsRequirements: function (requirements) {
+        for (var i = 0; i < requirements.length; i++) {
+            if (!requirements[i].validate()) {
+                return false;
+            }
+        }
+        return true;
+    }
+};
+
+var GameRaceInternals = {
+    pushContentInArray: function (race, array, contentKey, baseObject) {
+        for (var key in race.content[contentKey]) {
+            if (race.content[contentKey].hasOwnProperty(key)) {
+                var object = race.content[contentKey][key];
+                array.push(baseObject.create(race, key, object.type,
+                    this.parseCost(object.cost),
+                    this.parseGenerates(object.generates),
+                    this.parseRequirements(object.preReq)));
+            }
+        }
+    },
+
+    parseCost: function (object) {
+        return this.parseResourceRequirement(object, function (object, type, key) {
+            return RelationCost.create(type, key, object.amount, GameRaceInternals.parseGenerator(object));
+        });
+    },
+
+    parseGenerates: function (object) {
+        return this.parseResourceRequirement(object, function (object, type, key) {
+            return RelationGenerates.create(type, key, object.amount, GameRaceInternals.parseGenerator(object));
+        });
+    },
+
+    parseRequirements: function (object) {
+        // Rewrite to support more than 'ownUnit'
+        return this.parseResourceRequirement(object, function (object, type, key) {
+            return RelationRequirement.create(object.type, type, key, object.amount, GameRaceInternals.parseGenerator(object));
+        });
+    },
+
+    parseResourceRequirement: function (object, generateOne) {
+        if (object) {
+            var array = [];
+            for (var i = 0; i < object.length; i++) {
+                var tuple = this.parseTypeAndKey(object),
+                    type = tuple[0],
+                    key = tuple[1];
+                array.push(generateOne(object, type, key));
+            }
+            return array;
+        }
+        return undefined;
+    },
+
+    parseTypeAndKey: function (object) {
+        var type = undefined,
+            key = undefined;
+        if (object.resource) {
+            type = 'resource';
+            key = object.resource;
+        }
+        else if (object.unit) {
+            type = 'unit';
+            key = object.unit;
+        }
+        else if (object.building) {
+            type = 'building';
+            key = object.building;
+        }
+        return [type, key];
+    },
+
+    parseGenerator: function (object) {
+        return Generator.create(object.multiplier, object.curve);
+    },
+
+    indexEntities: function (table) {
+        for (var i = 1; i < arguments.length; i++) {
+            for (var j = 0; j < arguments[i].length; j++) {
+                var entity = arguments[i][j];
+                table[entity.getIdentifier()] = entity;
+            }
+        }
+    }
+};
+
+
 function RaceResource(name, content, raceOwner) {
 	this.raceOwner = raceOwner;
 	this.name = name;
@@ -149,8 +273,8 @@ function Race(name, content) {
 	this.unlocked = {};
 
 	this.init = function () {
-		for (key in this.content.resources) {
-			if (this.content.resources.hasOwnProperty(key)) {
+        for (key in this.content.resources) {
+            if (this.content.resources.hasOwnProperty(key)) {
 				var resource = new RaceResource(key, this.content.resources[key], this);
 				this.resources.push(resource);
 				this.resourcesLookupTable[resource.name] = resource;

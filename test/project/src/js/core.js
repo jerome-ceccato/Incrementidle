@@ -11,7 +11,8 @@ var engine = new function() {
 	};
 
 	this.start = function() {
-		this.game = new Game(new Race('plants', gameContent.plants));
+		//this.game = new Game(new Race('plants', gameContent.plants));
+		this.game = new Game(GameRace.create('plants', gameContent.plants));
 		this.game.buildTables();
 		this.refresh();
 
