@@ -44,6 +44,14 @@ var GameEntity = {
             return true;
         }
         return false;
+    },
+
+    canAfford: function (n) {
+        if (this.cost === undefined) {
+            return false;
+        }
+        n = n === undefined ? new BigNumber(1) : n;
+        return this.race.canAffordEntity(this, n);
     }
 };
 

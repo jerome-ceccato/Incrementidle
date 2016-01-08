@@ -17,6 +17,7 @@ var GameRace = {
         GameRaceInternals.pushContentInArray(this, this.units, 'units', GameUnit);
         GameRaceInternals.pushContentInArray(this, this.upgrades, 'upgrades', GameUpgrade);
         GameRaceInternals.indexEntities(this.entitiesLookupTable, this.resources, this.units, this.upgrades);
+
         return this;
     },
 
@@ -35,7 +36,17 @@ var GameRace = {
 
     meetsRequirements: function (requirements) {
         for (var i = 0; i < requirements.length; i++) {
-            if (!requirements[i].validate()) {
+            if (!requirements[i].validate(this)) {
+                return false;
+            }
+        }
+        return true;
+    },
+
+    // Buy
+    canAffordEntity: function (entity, n) {
+        for (var i = 0; i < entity.cost.length; i++) {
+            if (!entity.cost[i].validate(this, entity, n)) {
                 return false;
             }
         }
@@ -79,10 +90,10 @@ var GameRaceInternals = {
         if (object) {
             var array = [];
             for (var i = 0; i < object.length; i++) {
-                var tuple = this.parseTypeAndKey(object),
+                var tuple = this.parseTypeAndKey(object[i]),
                     type = tuple[0],
                     key = tuple[1];
-                array.push(generateOne(object, type, key));
+                array.push(generateOne(object[i], type, key));
             }
             return array;
         }
@@ -120,7 +131,6 @@ var GameRaceInternals = {
         }
     }
 };
-
 
 function RaceResource(name, content, raceOwner) {
 	this.raceOwner = raceOwner;

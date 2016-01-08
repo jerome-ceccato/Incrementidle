@@ -18,6 +18,12 @@ gameContent.plants = {
 				"resource": "seed",
 				"amount": 0.1
 			}],
+
+            "preReq": [{
+                "type": "ownResource",
+                "resource": "seed",
+                "amount": 1
+            }]
 		},
 
 		"root": {

@@ -14,7 +14,10 @@ var RelationBase = {
 };
 
 var RelationCost = $.extend(Object.create(RelationBase), {
-
+    validate: function (race, entity, n) {
+        var resource = race.getEntity(this.key);
+        return resource.owned.greaterThanOrEqualTo(this.generator.getAmount(entity.owned, this.amount.times(n)));
+    }
 });
 
 var RelationGenerates = $.extend(Object.create(RelationBase), {
@@ -30,7 +33,7 @@ var RelationRequirement = $.extend(Object.create(RelationBase), {
     },
 
     validate: function (race) {
-        if (this.requirement == 'ownUnit') {
+        if (this.requirement == 'ownUnit' || this.requirement == 'ownResource' || this.requirement == 'ownBuilding') {
             return race.getEntity(this.key).owned.greaterThanOrEqualTo(this.amount);
         }
         return false;

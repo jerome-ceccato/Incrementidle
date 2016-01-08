@@ -68,9 +68,8 @@ function Game(race) {
                 cost.text(entity.displayCost());
 
                 var shouldReveal = entity.isVisible();
-                button.prop('disabled', !shouldReveal);
+                button.prop('disabled', !shouldReveal || !entity.canAfford(engine.selectedBuyQuantity()));
                 button.text(shouldReveal ? entity.displayString() : '  ?  ');
-				//button.prop('disabled', !shouldReveal || !self.race.canAfford(data[ntd], type, engine.selectedBuyQuantity()));
 			}
 		};
 

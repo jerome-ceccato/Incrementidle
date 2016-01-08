@@ -7,7 +7,7 @@ var engine = new function() {
 	};
 
 	this.selectedBuyQuantity = function() {
-		return 1;
+		return new BigNumber(1);
 	};
 
 	this.start = function() {
