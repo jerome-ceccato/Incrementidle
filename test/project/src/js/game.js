@@ -26,9 +26,9 @@ function Game(race) {
 					(function(entity, button) {
 						button.onclick = function() {
 							console.log(button.id);
-							//if (race.tryBuy(entity, type, engine.selectedBuyQuantity())) {
-							//	engine.refresh();
-							//}
+							if (entity.tryBuy(engine.selectedBuyQuantity())) {
+                                engine.refresh();
+                            }
 						};
 					})(entity, button);
 

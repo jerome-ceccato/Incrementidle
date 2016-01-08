@@ -15,8 +15,16 @@ var RelationBase = {
 
 var RelationCost = $.extend(Object.create(RelationBase), {
     validate: function (race, entity, n) {
-        var resource = race.getEntity(this.key);
-        return resource.owned.greaterThanOrEqualTo(this.generator.getAmount(entity.owned, this.amount.times(n)));
+        var resource = race.getEntity(this.getEntityIdentifier());
+        return resource.owned.greaterThanOrEqualTo(this.getCostForEntities(entity, n));
+    },
+
+    getEntityIdentifier: function () {
+        return this.key;
+    },
+
+    getCostForEntities: function (entity, n) {
+        return this.generator.getAmount(entity.owned, this.amount, n);
     }
 });
 

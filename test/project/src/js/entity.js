@@ -52,6 +52,29 @@ var GameEntity = {
         }
         n = n === undefined ? new BigNumber(1) : n;
         return this.race.canAffordEntity(this, n);
+    },
+    
+    tryBuy: function (n) {
+        if (this.cost === undefined) {
+            return false;
+        }
+        if (n) {
+            if (this.canAfford(n)) {
+                this.verifiedBuy(n);
+                return true;
+            }
+            return false;
+        }
+        return false;
+    },
+
+    verifiedBuy: function (n) {
+        for (var i = 0; i < this.cost.length; i++) {
+            var cost = this.cost[i];
+            var entity = this.race.getEntity(cost.getEntityIdentifier());
+            entity.owned = entity.owned.sub(cost.getCostForEntities(this, n));
+        }
+        this.owned = this.owned.add(n);
     }
 };
 
