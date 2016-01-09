@@ -1,93 +1,140 @@
-function Game(race) {
-	this.race = race;
+var Game = {
+    create: function (race) {
+        return $.extend(Object.create(this), {
+            race: race
+        }).init();
+    },
 
-	this.buildTables = function() {
-		var array = ['resources', 'units', 'upgrades'];
+    init: function () {
+        GameInternals.buildTables(this.race);
+        return this;
+    },
+
+    tick: function () {
+        this.race.tick(new BigNumber(0.1));
+    },
+
+    refresh: function () {
+        this.race.prepareForDisplay();
+        GameInternals.refreshTables(this.race);
+    },
+
+    ////////////////////////////////////////////////////////
+    /// DEBUG
+    ////////////////////////////////////////////////////////
+
+    mainButtonPressed: function () {
+        var entity = this.race.getEntity('seed');
+        entity.owned = entity.owned.add(1);
+    },
+
+    mainButton2Pressed: function () {
+        var entity = this.race.getEntity('seed');
+        entity.owned = entity.owned.times(10);
+    }
+};
+
+var GameInternals = {
+    unavailableText: '?',
+
+    buildTables: function (race) {
+        var array = ['resources', 'units', 'upgrades'];
         for (var i = 0; i < array.length; i++) {
-            var doc = document.getElementById('table_' + array[i]);
-            doc.innerHTML = '';
-            this.buildTableFromData(doc, this.race[array[i]], array[i]);
+            var doc = $('#table_' + array[i]);
+            doc.html('');
+            this.buildTableFromData(doc, race[array[i]], i == 0);
         }
-	};
+    },
 
-	this.buildTableFromData = function(table, data, type) {
-		var tableBody = document.createElement('tbody');
-		for (var ntr = 0; ntr < 4; ntr++) {
-			var tr = document.createElement('tr');
-			for (var ntd = 0; ntd < data.length; ntd++) {
-				var td = document.createElement('td');
-                var entity = data[ntd];
-				if (ntr == 0) {
-					var button = document.createElement('button');
-					var buttonContent = document.createTextNode('?');
-					button.appendChild(buttonContent);
-					button.id = this.identifierForNode(entity, 'button');
+    buildTableFromData: function (table, data, isResource) {
+        var body = $('<tbody>');
+        var row = $('<tr>');
 
-					(function(entity, button) {
-						button.onclick = function() {
-							console.log(button.id);
-							if (entity.tryBuy(engine.selectedBuyQuantity())) {
-                                engine.refresh();
-                            }
-						};
-					})(entity, button);
+        // Row 1: name and buy button
+        $.each(data, function (i) {
+            var column = $('<td>');
 
-					td.appendChild(button);
-				}
-                else if (ntr == 1) {
-                    var text = document.createTextNode('?');
-                    td.id = this.identifierForNode(entity, 'text');
-                    td.appendChild(text);
-                }
-                else {
-					var cost = document.createTextNode('?');
-					td.id = this.identifierForNode(entity, (ntr == 2 ? 'cost' : 'generates'));
-					td.appendChild(cost);
-				}
-				tr.appendChild(td);
-			}
-			tableBody.appendChild(tr);
-		}
-		table.appendChild(tableBody);
-	};
+            var nameText = $('<span>',  {
+                text: this.unavailableText,
+                id: this.identifierForNode(data[i], 'nameText')
+            });
+            column.append(nameText);
 
-    this.identifierForNode = function(entity, nodeType) {
+            if (!isResource) {
+                var button = $('<button>', {
+                    text: 'Buy',
+                    id: this.identifierForNode(data[i], 'buyButton')
+                });
+
+                button.click(function (entity) {
+                    if (entity.tryBuy(engine.selectedBuyQuantity())) {
+                        engine.refresh();
+                    }
+                }.bind(this, data[i]));
+                column.append(button);
+            }
+            body.append(row.append(column));
+        }.bind(this));
+
+        // Row 2: Owned and generated amounts
+        row = $('<tr>');
+        $.each(data, function (i) {
+            var amountText = $('<span>',  {
+                text: this.unavailableText,
+                id: this.identifierForNode(data[i], 'amountText')
+            });
+
+            var generatedText = $('<span>',  {
+                text: '',
+                id: this.identifierForNode(data[i], 'generatedText')
+            });
+
+            var column = $('<td>').append(amountText).append(generatedText);
+            body.append(row.append(column));
+        }.bind(this));
+
+        // Row 3: Cost
+        if (!isResource) {
+            row = $('<tr>');
+            $.each(data, function (i) {
+                var costText = $('<span>', {
+                    text: this.unavailableText,
+                    id: this.identifierForNode(data[i], 'costText')
+                });
+
+                var column = $('<td>').append(costText);
+                body.append(row.append(column));
+            }.bind(this));
+        }
+
+        table.append(body);
+    },
+
+    identifierForNode: function (entity, nodeType) {
         return entity.getIdentifier() + '-' + nodeType;
-    };
+    },
 
-	this.refreshTable = function() {
-		var refreshSingleTable = function(self, data) {
-			for (var ntd = 0; ntd < data.length; ntd++) {
-                var entity = data[ntd];
+    refreshTables: function (race) {
+        this.refreshSingleTable(race.resources);
+        this.refreshSingleTable(race.units);
+        this.refreshSingleTable(race.upgrades);
+    },
 
-				var value = $('#' + self.identifierForNode(entity, 'text')),
-                    button = $('#' + self.identifierForNode(entity, 'button')),
-                    cost = $('#' + self.identifierForNode(entity, 'cost')),
-					generates = $('#' + self.identifierForNode(entity, 'generates'));
+    refreshSingleTable: function (entities) {
+        for (var i = 0; i < entities.length; i++) {
+            var entity = entities[i];
+            var nameText = $('#' + this.identifierForNode(entity, 'nameText')),
+                buyButton = $('#' + this.identifierForNode(entity, 'buyButton')),
+                amountText = $('#' + this.identifierForNode(entity, 'amountText')),
+                generatedText = $('#' + this.identifierForNode(entity, 'generatedText')),
+                costText = $('#' + this.identifierForNode(entity, 'costText'));
 
-                var shouldReveal = entity.isVisible();
-                button.prop('disabled', !shouldReveal || !entity.canAfford(engine.selectedBuyQuantity()));
-                button.text(shouldReveal ? entity.displayString() : '  ?  ');
-				value.html(shouldReveal ? entity.ownedDisplayString() : '  ?  ');
-				cost.text('cost: ' + (shouldReveal ? entity.displayCost() : '  ?  '));
-				generates.text('generates: ' + (shouldReveal ? entity.displayGenerates() : '  ?  '));
-			}
-		};
-
-		refreshSingleTable(this, this.race.resources);
-		refreshSingleTable(this, this.race.units);
-		refreshSingleTable(this, this.race.upgrades);
-	};
-
-	this.tick = function() {
-		this.race.tick(new BigNumber(0.1));
-	};
-
-	this.mainButtonPressed = function() {
-		this.race.resources[0].owned = this.race.resources[0].owned.add(1);
-	};
-
-	this.mainButton2Pressed = function() {
-		this.race.resources[0].owned = this.race.resources[0].owned.times(10);
-	};
-}
+            var shouldReveal = entity.isVisible();
+            nameText.text(shouldReveal ? entity.displayString() : this.unavailableText);
+            buyButton.prop('disabled', !shouldReveal || !entity.canAfford(engine.selectedBuyQuantity()));
+            costText.text(shouldReveal ? 'Cost: ' + entity.displayCost(engine.selectedBuyQuantity()) : null);
+            amountText.text(shouldReveal ? entity.ownedDisplayString() : this.unavailableText);
+            generatedText.text(shouldReveal ? entity.displayGenerated() : '');
+        }
+    }
+};

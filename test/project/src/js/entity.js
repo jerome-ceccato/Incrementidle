@@ -82,6 +82,10 @@ var GameEntity = {
         }
     },
 
+    amountGeneratedPerTick: function () {
+        return this.race.getGeneratedAmountForEntityIdentifier(this.getIdentifier());
+    },
+
     ////////////////////////////////////////////////////////
     /// DEBUG
     ////////////////////////////////////////////////////////
@@ -102,20 +106,13 @@ var GameEntity = {
         return '-';
     },
 
-    displayGenerates: function (n) {
-        if (this.generates && this.generates.length > 0) {
-            var content = '';
-            n = n === undefined ? new BigNumber(1) : n;
-            for (var i = 0; i < this.generates.length; i++) {
-                if (content.length > 0) {
-                    content += ', ';
-                }
-                var total = this.generates[i].getGeneratedAmountForEntities(this, n.times(this.owned));
-                content += '' + Formatter.number(total) + ' ' + this.race.locale.displayNameForKey(this.generates[i].getEntityIdentifier(), total.greaterThan(1));
-            }
-            return content;
+    displayGenerated: function () {
+        var generated = this.amountGeneratedPerTick();
+        if (generated === undefined || generated.equals(0)) {
+            return '';
         }
-        return '-';
+        var generatedString = Formatter.number(generated.abs());
+        return '(' + (generated.isNeg() ? '-' : '+') + generatedString + '/sec)';
     }
 };
 

@@ -6,8 +6,7 @@ var engine = {
     },
 
     start: function () {
-        this.game = new Game(GameRace.create('plants', gameContent.plants));
-        this.game.buildTables();
+        this.game = Game.create(GameRace.create('plants', gameContent.plants));
         this.refresh();
 
         var self = this;
@@ -22,7 +21,7 @@ var engine = {
     },
 
     refresh: function () {
-        this.game.refreshTable();
+        this.game.refresh();
     },
 
     ////////////////////////////////////////////////////////
