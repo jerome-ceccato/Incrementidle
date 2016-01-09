@@ -20,18 +20,11 @@ var GameEntity = {
     },
 
     ownedDisplayString: function () {
-        return this.owned.toString();
+        return Formatter.number(this.owned);
     },
 
     displayString: function () {
         return this.race.locale.displayNameForKey(this.name, this.owned.greaterThan(1));
-    },
-
-    displayCost: function () {
-        if (this.cost && this.cost.length > 0) {
-            return 'has cost';
-        }
-        return '';
     },
 
     isVisible: function () {
@@ -75,6 +68,54 @@ var GameEntity = {
             entity.owned = entity.owned.sub(cost.getCostForEntities(this, n));
         }
         this.owned = this.owned.add(n);
+    },
+
+    canGenerateEntities: function () {
+        return this.generates !== undefined && this.generates.length > 0 && this.owned.greaterThan(0);
+    },
+    
+    verifiedGenerate: function (n) {
+        for (var i = 0; i < this.generates.length; i++) {
+            var generated = this.generates[i];
+            var entity = this.race.getEntity(generated.getEntityIdentifier());
+            entity.owned = entity.owned.add(generated.getGeneratedAmountForEntities(this, n));
+        }
+    },
+
+    ////////////////////////////////////////////////////////
+    /// DEBUG
+    ////////////////////////////////////////////////////////
+
+    displayCost: function (n) {
+        if (this.cost && this.cost.length > 0) {
+            var content = '';
+            n = n === undefined ? new BigNumber(1) : n;
+            for (var i = 0; i < this.cost.length; i++) {
+                if (content.length > 0) {
+                    content += ', ';
+                }
+                var totalCost = this.cost[i].getCostForEntities(this, n);
+                content += '' + Formatter.number(totalCost) + ' ' + this.race.locale.displayNameForKey(this.cost[i].getEntityIdentifier(), totalCost.greaterThan(1));
+            }
+            return content;
+        }
+        return '-';
+    },
+
+    displayGenerates: function (n) {
+        if (this.generates && this.generates.length > 0) {
+            var content = '';
+            n = n === undefined ? new BigNumber(1) : n;
+            for (var i = 0; i < this.generates.length; i++) {
+                if (content.length > 0) {
+                    content += ', ';
+                }
+                var total = this.generates[i].getGeneratedAmountForEntities(this, n.times(this.owned));
+                content += '' + Formatter.number(total) + ' ' + this.race.locale.displayNameForKey(this.generates[i].getEntityIdentifier(), total.greaterThan(1));
+            }
+            return content;
+        }
+        return '-';
     }
 };
 

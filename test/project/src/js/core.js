@@ -18,7 +18,7 @@ var engine = new function() {
 
 		window.setInterval(function() {
 			engine.update();
-		}, 1000);
+		}, 100);
 	};
 
 	this.update = function() {
@@ -32,6 +32,11 @@ var engine = new function() {
 
 	this.mainButtonPressed = function() {
 		this.game.mainButtonPressed();
+		this.refresh();
+	};
+
+	this.mainButton2Pressed = function() {
+		this.game.mainButton2Pressed();
 		this.refresh();
 	};
 };

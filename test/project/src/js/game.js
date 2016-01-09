@@ -12,7 +12,7 @@ function Game(race) {
 
 	this.buildTableFromData = function(table, data, type) {
 		var tableBody = document.createElement('tbody');
-		for (var ntr = 0; ntr < 3; ntr++) {
+		for (var ntr = 0; ntr < 4; ntr++) {
 			var tr = document.createElement('tr');
 			for (var ntd = 0; ntd < data.length; ntd++) {
 				var td = document.createElement('td');
@@ -41,7 +41,7 @@ function Game(race) {
                 }
                 else {
 					var cost = document.createTextNode('?');
-					td.id = this.identifierForNode(entity, 'cost');
+					td.id = this.identifierForNode(entity, (ntr == 2 ? 'cost' : 'generates'));
 					td.appendChild(cost);
 				}
 				tr.appendChild(td);
@@ -62,14 +62,15 @@ function Game(race) {
 
 				var value = $('#' + self.identifierForNode(entity, 'text')),
                     button = $('#' + self.identifierForNode(entity, 'button')),
-                    cost = $('#' + self.identifierForNode(entity, 'cost'));
-
-				value.html(entity.ownedDisplayString());
-                cost.text(entity.displayCost());
+                    cost = $('#' + self.identifierForNode(entity, 'cost')),
+					generates = $('#' + self.identifierForNode(entity, 'generates'));
 
                 var shouldReveal = entity.isVisible();
                 button.prop('disabled', !shouldReveal || !entity.canAfford(engine.selectedBuyQuantity()));
                 button.text(shouldReveal ? entity.displayString() : '  ?  ');
+				value.html(shouldReveal ? entity.ownedDisplayString() : '  ?  ');
+				cost.text('cost: ' + (shouldReveal ? entity.displayCost() : '  ?  '));
+				generates.text('generates: ' + (shouldReveal ? entity.displayGenerates() : '  ?  '));
 			}
 		};
 
@@ -79,10 +80,14 @@ function Game(race) {
 	};
 
 	this.tick = function() {
-		//this.race.tick(1);
+		this.race.tick(new BigNumber(0.1));
 	};
 
 	this.mainButtonPressed = function() {
 		this.race.resources[0].owned = this.race.resources[0].owned.add(1);
 	};
-};
+
+	this.mainButton2Pressed = function() {
+		this.race.resources[0].owned = this.race.resources[0].owned.times(10);
+	};
+}

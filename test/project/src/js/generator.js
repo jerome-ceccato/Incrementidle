@@ -17,6 +17,10 @@ var Generator = {
                 this.generate = this.generateExponential;
                 this.multiplier = this.multiplier || new BigNumber(1.1);
                 break;
+            case 'fixed':
+                this.generate = this.generateFixed;
+                this.multiplier = this.multiplier || new BigNumber(1);
+                break;
             default:
                 this.generate = this.generateLinear;
                 this.multiplier = this.multiplier || new BigNumber(1);
@@ -26,6 +30,10 @@ var Generator = {
 
     getAmount: function (owned, cost, n) {
         return this.generate(owned, cost, n);
+    },
+
+    generateFixed: function (owned, cost, n) {
+        return cost.times(n);
     },
 
     generateLinear: function (owned, cost, n) {
@@ -46,10 +54,18 @@ var Generator = {
             return initial;
         }
         return initial.times(this.multiplier.pow(n).sub(1).div(this.multiplier.sub(1)));
+    },
+    
+    getMaxAffordable: function (entity, cost, n) {
+        if (this.curve != 'fixed') {
+            throw new TypeError('getMaxAffordable() is unimplemented for ' + this.curve + ' curve');
+        }
+        return BigNumber.min(n, entity.owned.div(cost));
     }
 };
 
-var defaultGenerator = Generator.create();
+var defaultCostGenerator = Generator.create(new BigNumber(1), 'linear');
+var defaultGeneratesGenerator = Generator.create(new BigNumber(1), 'fixed');
 
 /*
     x(n) = C * n

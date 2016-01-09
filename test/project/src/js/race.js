@@ -51,10 +51,39 @@ var GameRace = {
             }
         }
         return true;
+    },
+
+	// Generate
+	generateEntities: function (n) {
+        var self = this;
+        GameRaceInternals.foreachEntity(this, function (entity) {
+            if (entity.canGenerateEntities()) {
+                var maxAffordable = n.times(entity.owned);
+                for (var i = 0; i < entity.generates.length; i++) {
+                    maxAffordable = BigNumber.max(maxAffordable, entity.generates[i].getMaxGenerable(self, maxAffordable));
+                }
+                if (maxAffordable.greaterThan(0)) {
+                    entity.verifiedGenerate(maxAffordable);
+                }
+            }
+        });
+	},
+
+    // Game loop
+    tick: function (n) {
+        this.generateEntities(n);
     }
 };
 
 var GameRaceInternals = {
+    foreachEntity: function (race, callback) {
+        for (var key in race.entitiesLookupTable) {
+            if (race.entitiesLookupTable.hasOwnProperty(key)) {
+                callback(race.entitiesLookupTable[key]);
+            }
+        }
+    },
+
     pushContentInArray: function (race, array, contentKey, baseObject) {
         for (var key in race.content[contentKey]) {
             if (race.content[contentKey].hasOwnProperty(key)) {
@@ -119,7 +148,10 @@ var GameRaceInternals = {
     },
 
     parseGenerator: function (object) {
-        return Generator.create(object.multiplier, object.curve);
+        if (object.multiplier !== undefined || object.curve !== undefined) {
+            return Generator.create(object.multiplier, object.curve);
+        }
+        return undefined;
     },
 
     indexEntities: function (table) {
