@@ -2,7 +2,7 @@ var engine = {
     game: undefined,
 
     selectedBuyQuantity: function () {
-        return new BigNumber(1);
+        return new BigNumber($('#buyAmount').val());
     },
 
     start: function () {

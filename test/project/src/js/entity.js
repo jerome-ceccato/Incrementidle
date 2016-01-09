@@ -123,5 +123,31 @@ var GameUnit = $.extend(Object.create(GameEntity), {
 });
 
 var GameUpgrade = $.extend(Object.create(GameEntity), {
+    unlocked: false,
+
+    ownedDisplayString: function () {
+        return this.unlocked ? 'Unlocked' : '-';
+    },
+
+    canAfford: function () {
+        return this.unlocked ? false : GameEntity.canAfford.call(this, new BigNumber(1));
+    },
+
+    tryBuy: function () {
+        return this.unlocked ? false : GameEntity.tryBuy.call(this, new BigNumber(1))
+    },
+
+    verifiedBuy: function () {
+        GameEntity.verifiedBuy.call(this, new BigNumber(1));
+        this.unlocked = true;
+    },
+
+    ////////////////////////////////////////////////////////
+    /// DEBUG
+    ////////////////////////////////////////////////////////
+
+    displayCost: function () {
+        return this.unlocked ? '-' : GameEntity.displayCost.call(this, new BigNumber(1));
+    }
 });
 

@@ -29,7 +29,7 @@ var Game = {
     },
 
     mainButton2Pressed: function () {
-        var entity = this.race.getEntity('seed');
+        var entity = this.race.getEntity($('#selectMore').val());
         entity.owned = entity.owned.times(10);
     }
 };

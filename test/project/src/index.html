@@ -21,7 +21,19 @@
 	<h1>Playground</h1>
 	<br/>
 	<button onclick="engine.mainButtonPressed()">Click to generate seeds</button>
-	<button onclick="engine.mainButton2Pressed()">MORE seeds</button>
+	<button onclick="engine.mainButton2Pressed()">MORE -></button>
+	<select title="more" id="selectMore">
+		<option value="seed">seeds</option>
+		<option value="nutriment">nutriments</option>
+		<option value="water">water</option>
+		<option value="discovery">discovery</option>
+	</select>
+	<div>Buy amount: <select title="buy" id="buyAmount">
+		<option value="1">1</option>
+		<option value="10">10</option>
+		<option value="50">50</option>
+		<option value="100">100</option>
+	</select></div>
 	<br/><br/>
 	<h3>Resources:</h3>
 	<table border="1" id="table_resources"></table>
