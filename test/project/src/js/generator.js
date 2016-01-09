@@ -64,33 +64,5 @@ var Generator = {
     }
 };
 
-var defaultCostGenerator = Generator.create(new BigNumber(1), 'linear');
+var defaultCostGenerator = Generator.create(new BigNumber(1.1), 'exponential');
 var defaultGeneratesGenerator = Generator.create(new BigNumber(1), 'fixed');
-
-/*
-    x(n) = C * n
-
-    x(a) + x(a+1) + x(a+2) + x(a+3) + x(a+4)
-    = C * a + C * (a+1) + C * (a+2) + C * (a+3) + C * (a+4)
-    = C * a + C * a + C + C * a + 2C + C * a + 3C + C * a + 4C
-    = 5(C * a) + C + 2C + 3C + 4C
-    = 5(C * a) + 10C
-
- x(a) + x(a+1) + x(a+2) + x(a+3) + x(a+4) + x(a+5) + x(a+6) + x(a+7)
- = C * a + C * (a+1) + C * (a+2) + C * (a+3) + C * (a+4) + C * (a+5) + C * (a+6) + C * (a+7)
- = C * a + C * a + C + C * a + 2C + C * a + 3C + C * a + 4C + C * a + 5C + C * a + 6C + C * a + 7C
- = 8(C * a) + C + 2C + 3C + 4C + 5C + 6C + 7C
- = 8(C * a) + 28C
-
- E(i, a -> b) x(i) = (b - a + 1)*x(a) + (C * E(j, 1 -> (b - a)) j)
- = (b - a + 1)*x(a) + 0.5(b - a)((b - a) + 1)*C
-
- E(i, 28 -> 35), C:10 = (35-28+1)*(28*10) + 0.5(35-28)(35-28+1)*10
- = 8*(28*10) + 28*10
- = 2520
-
- 28*10 + 29*10 + 30*10 + 31*10 + 32*10 + 33*10 + 34*10 + 35*10 = 2520
-
- console.log(defaultGenerator.generateLinear(new BigNumber(28), new BigNumber(10), new BigNumber(8)).toString());
- => 2520
-*/
