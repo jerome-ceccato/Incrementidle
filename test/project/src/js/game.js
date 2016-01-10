@@ -1,4 +1,6 @@
 var Game = {
+    lastUpdate: undefined,
+
     create: function (race) {
         return $.extend(Object.create(this), {
             race: race
@@ -7,11 +9,14 @@ var Game = {
 
     init: function () {
         GameInternals.buildTables(this.race);
+        this.lastUpdate = new Date().getTime();
         return this;
     },
 
     tick: function () {
-        this.race.tick(new BigNumber(0.1));
+        var elapsedTime = (new Date().getTime() - this.lastUpdate) / 1000.0;
+        this.race.tick(new BigNumber(elapsedTime));
+        this.lastUpdate = new Date().getTime();
     },
 
     refresh: function () {
