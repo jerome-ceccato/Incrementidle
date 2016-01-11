@@ -1,38 +1,21 @@
-var engine = new function() {
+var engine = {
+    start: function () {
+        Test.init();
+        this.refresh();
+        var self = this;
 
-	this.game = undefined;
+        window.setInterval(function () {
+            self.update();
+        }, 100);
+    },
 
-	this.currentLocale = function() {
-		return 'fr';
-	};
+    update: function () {
+        this.refresh();
+    },
 
-	this.selectedBuyQuantity = function() {
-		return 1;
-	};
-
-	this.start = function() {
-		this.game = new Game(new Race('plants', gameContent.plants));
-		this.game.buildTables();
-		this.refresh();
-
-		window.setInterval(function() {
-			engine.update();
-		}, 1000);
-	};
-
-	this.update = function() {
-		this.game.tick();
-		this.refresh();
-	};
-
-	this.refresh = function() {
-		this.game.refreshTable();
-	};
-
-	this.mainButtonPressed = function() {
-		this.game.mainButtonPressed();
-		this.refresh();
-	};
+    refresh: function () {
+        Test.refresh();
+    }
 };
 
 $(document).ready(function() {
