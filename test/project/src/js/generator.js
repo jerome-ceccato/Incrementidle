@@ -4,6 +4,7 @@
 
 var Generator = {
     generate: undefined,
+    maxAffordable: undefined,
     create: function (multiplier, curve) {
         return $.extend(Object.create(this), {
             multiplier: multiplier,
@@ -15,14 +16,17 @@ var Generator = {
         switch (this.curve) {
             case 'exponential':
                 this.generate = this.generateExponential;
+                this.maxAffordable = this.maxAffordableExponential;
                 this.multiplier = this.multiplier || new BigNumber(1.1);
                 break;
             case 'fixed':
                 this.generate = this.generateFixed;
+                this.maxAffordable = this.maxAffordableFixed;
                 this.multiplier = this.multiplier || new BigNumber(1);
                 break;
             default:
                 this.generate = this.generateLinear;
+                this.maxAffordable = this.maxAffordableLinear;
                 this.multiplier = this.multiplier || new BigNumber(1);
         }
         return this;
@@ -57,11 +61,18 @@ var Generator = {
     },
     
     getMaxAffordable: function (entity, cost, n) {
-        if (this.curve != 'fixed') {
-            throw new TypeError('getMaxAffordable() is unimplemented for ' + this.curve + ' curve');
-        }
+        return this.maxAffordable(entity, cost, n);
+    },
+
+    maxAffordableFixed: function (entity, cost, n) {
         return BigNumber.min(n, entity.owned.div(cost));
-    }
+    },
+
+    // TODO
+    maxAffordableLinear: function (entity, cost, n) {
+        throw new TypeError('getMaxAffordable() is unimplemented for ' + this.curve + ' curve');
+    },
+    maxAffordableExponential: this.maxAffordableLinear
 };
 
 var defaultCostGenerator = Generator.create(new BigNumber(1.1), 'exponential');
