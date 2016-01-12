@@ -12,6 +12,10 @@ https://www.reddit.com/r/incremental_games/comments/3yi29q/help_with_arithmetic_
 
 https://www.reddit.com/r/incremental_games/comments/3tki2w/incremental_game_math_functions/
 
+http://gamedevelopment.tutsplus.com/articles/numbers-getting-bigger-the-design-and-math-of-incremental-games--cms-24023
+
+
+
 ### Useful links
 
 https://www.reddit.com/r/incremental_games/wiki/build_a_game

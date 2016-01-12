@@ -15,7 +15,7 @@ var Game = {
 
     tick: function () {
         var elapsedTime = (new Date().getTime() - this.lastUpdate) / 1000.0;
-        this.race.tick(new BigNumber(elapsedTime));
+        this.race.tick(GameNumber(elapsedTime));
         this.lastUpdate = new Date().getTime();
     },
 

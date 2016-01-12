@@ -3,7 +3,7 @@
  */
 
 var GameEntity = {
-    owned: new BigNumber(0),
+    owned: GameNumber(0),
     create: function (race, name, type, cost, generates, requirements) {
         return $.extend(Object.create(this), {
             race: race,
@@ -43,7 +43,7 @@ var GameEntity = {
         if (this.cost === undefined) {
             return false;
         }
-        n = n === undefined ? new BigNumber(1) : n;
+        n = n === undefined ? GameNumber(1) : n;
         return this.race.canAffordEntity(this, n);
     },
     
@@ -93,7 +93,7 @@ var GameEntity = {
     displayCost: function (n) {
         if (this.cost && this.cost.length > 0) {
             var content = '';
-            n = n === undefined ? new BigNumber(1) : n;
+            n = n === undefined ? GameNumber(1) : n;
             for (var i = 0; i < this.cost.length; i++) {
                 if (content.length > 0) {
                     content += ', ';
@@ -130,15 +130,15 @@ var GameUpgrade = $.extend(Object.create(GameEntity), {
     },
 
     canAfford: function () {
-        return this.unlocked ? false : GameEntity.canAfford.call(this, new BigNumber(1));
+        return this.unlocked ? false : GameEntity.canAfford.call(this, GameNumber(1));
     },
 
     tryBuy: function () {
-        return this.unlocked ? false : GameEntity.tryBuy.call(this, new BigNumber(1))
+        return this.unlocked ? false : GameEntity.tryBuy.call(this, GameNumber(1))
     },
 
     verifiedBuy: function () {
-        GameEntity.verifiedBuy.call(this, new BigNumber(1));
+        GameEntity.verifiedBuy.call(this, GameNumber(1));
         this.unlocked = true;
     },
 
@@ -147,7 +147,7 @@ var GameUpgrade = $.extend(Object.create(GameEntity), {
     ////////////////////////////////////////////////////////
 
     displayCost: function () {
-        return this.unlocked ? '-' : GameEntity.displayCost.call(this, new BigNumber(1));
+        return this.unlocked ? '-' : GameEntity.displayCost.call(this, GameNumber(1));
     }
 });
 

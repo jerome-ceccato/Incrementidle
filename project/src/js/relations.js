@@ -7,7 +7,7 @@ var RelationBase = {
         return $.extend(Object.create(this), {
             type: type,
             key: key,
-            amount: new BigNumber(amount || 1)
+            amount: GameNumber(amount || 1)
         });
     },
 
