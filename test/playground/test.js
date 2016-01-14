@@ -3,7 +3,7 @@
  */
  var Test = {
     createNumber: function (a) {
-        return new BigNumber(a);
+        return new Decimal(a);
     },
 
     init: function () {
@@ -31,20 +31,20 @@
 
             row.append($('<td>').append($('<span>', {
                 text: (function (owned, cost) {
-                    return Generator.generateExponential(Test.createNumber(owned), cost, Test.createNumber(1)).floor();
+                    return Generator.generate(Test.createNumber(owned), cost, Test.createNumber(1)).floor();
                 }.bind(this, i, cost))()
             })));
 
             row.append($('<td>').append($('<span>', {
                 text: (function (owned, cost, acc) {
-                    return acc.plus(Generator.generateExponential(Test.createNumber(owned), cost, Test.createNumber(1))).floor();
+                    return acc.plus(Generator.generate(Test.createNumber(owned), cost, Test.createNumber(1))).floor();
                 }.bind(this, i, cost, acc))()
             })));
-            acc = acc.plus(Generator.generateExponential(Test.createNumber(i), cost, Test.createNumber(1)));
+            acc = acc.plus(Generator.generate(Test.createNumber(i), cost, Test.createNumber(1)));
 
             row.append($('<td>').append($('<span>', {
                 text: (function (i, cost) {
-                    return Generator.generateExponential(Test.createNumber(0), cost, Test.createNumber(i + 1)).floor();
+                    return Generator.generate(Test.createNumber(0), cost, Test.createNumber(i + 1)).floor();
                 }.bind(this, i, cost))()
             })));
 
@@ -76,14 +76,12 @@
                 }.bind(this, Test.createNumber(10).pow(i)))()
             })));
 
-            /*
             row.append($('<td>').append($('<span>', {
                 text: (function (max) {
                     var n = Generator.maxAffordableBrute(Test.createNumber(0), cost, max);
-                    return Generator.generateExponential(Test.createNumber(0), cost, n).floor();
+                    return Generator.generate(Test.createNumber(0), cost, n).floor();
                 }.bind(this, Test.createNumber(10).pow(i)))()
             })));
-            */
 
             row.append($('<td>').append($('<span>', {
                 text: (function (max) {
@@ -94,7 +92,7 @@
             row.append($('<td>').append($('<span>', {
                 text: (function (max) {
                     var n = Generator.maxAffordable(Test.createNumber(0), cost, max);
-                    return Generator.generateExponential(Test.createNumber(0), cost, n).floor();
+                    return Generator.generate(Test.createNumber(0), cost, n).floor();
                 }.bind(this, Test.createNumber(10).pow(i)))()
             })));
 
@@ -104,16 +102,13 @@
         var time = new Date().getTime();
         var calc = 0;
         for (var i = 0; i < 100 ; i++) {
-            calc = Generator.maxAffordable(Test.createNumber(0), cost, Test.createNumber(10).pow(20));
+            calc = Generator.maxAffordable(Test.createNumber(0), cost, Test.createNumber(10).pow(1000));
         }
         $('#content').text('calc: ' + calc + ' (' + (new Date().getTime() - time) + ' ms)')
     },
 
     refresh: function () {
-        //100.	125278	1377961	1377961
-        //100.	125278	1377961	1377961
-        //1000.	2.2453935618234784856e+44	2.4699329180058263342e+45	2.4699329180058263341e+45
-        //1000.	2.24539356182347848556735307735020134337248489e+44	2.469932918005826334124088385085221477709723385e+45	2.469932918005826334124088385085221477709723385e+45
+
     }
 };
 
@@ -121,15 +116,24 @@ var Generator = {
     multiplier: Test.createNumber(1.1),
 
     generateExponential: function (owned, cost, n) {
-        // BigNumber.pow() does not support decimal exponents
-        var initial = cost.times(this.multiplier.pow(owned.floor()));
+        var initial = cost.times(this.multiplier.pow(owned));
         if (n.equals(1)) {
             return initial;
         }
         return initial.times(this.multiplier.pow(n).minus(1).div(this.multiplier.minus(1)));
     },
 
-    maxAffordableBrute: function (owned, cost, max) {
+    generateLinear: function (owned, cost, n) {
+        var normalizedCost = cost.times(this.multiplier);
+        var initial = owned.plus(1).times(normalizedCost);
+
+        if (n.equals(1)) {
+            return initial;
+        }
+        return initial.times(n).plus(n.minus(1).times(n).div(2).times(cost));
+    },
+
+    maxAffordableBruteExponential: function (owned, cost, max) {
         for (var i = Test.createNumber(1); true; i = i.plus(1)) {
             if (max.lessThan(this.generateExponential(owned, cost, i))) {
                 return i.minus(1);
@@ -137,13 +141,36 @@ var Generator = {
         }
     },
 
-    maxAffordable: function (owned, cost, max) {
+    maxAffordableBruteLinear: function (owned, cost, max) {
+        for (var i = Test.createNumber(1); true; i = i.plus(1)) {
+            if (max.lessThan(this.generateLinear(owned, cost, i))) {
+                return i.minus(1);
+            }
+        }
+    },
+
+    maxAffordableExponential: function (owned, cost, max) {
         var initial = cost.times(this.multiplier.pow(owned.floor()));
-        return Decimal.log(new Decimal(max.div(initial).times(this.multiplier.minus(1)).plus(1))).div(Decimal.log(new Decimal(this.multiplier))).floor();
+        return Decimal.log(max.div(initial).times(this.multiplier.minus(1)).plus(1)).div(Decimal.log(this.multiplier)).floor();
+    },
+
+    maxAffordableLinear: function (owned, cost, max) {
+        var initial = owned.plus(1).times(cost.times(this.multiplier));
+        return cost.times(max.times(cost).times(8).plus(initial.times(initial).times(4)).minus(initial.times(cost).times(4)).plus(cost.times(cost)).div(cost.times(cost)).sqrt()).minus(initial.times(2)).plus(cost).div(cost.times(2)).floor();
     }
 };
 
+Generator.generate = Generator.generateLinear;
+Generator.maxAffordableBrute = Generator.maxAffordableBruteLinear;
+Generator.maxAffordable = Generator.maxAffordableLinear;
 /*
+    money < (initial * n) + ((n - 1) * n / 2 * cost)
+    A < Bx + (x - 1)(x / 2 * C)
+    0 < Bx + (x - 1)(x / 2 * C) - A
+    -Bx < (x - 1)(x / 2 * C) - A
+    nvm
+ http://www.wolframalpha.com/input/?i=A+%3C+%28B+*+x%29+%2B+%28%28x+-+1%29+*+x+%2F+2+*+C%29%2C+x%3D%3F
+
 assuming initial, mult and money are positive
     money < initial * ((mult^max - 1) / (mult - 1))
     money/initial < (mult^max - 1) / (mult - 1)

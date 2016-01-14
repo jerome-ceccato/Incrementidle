@@ -67,9 +67,9 @@ var Generator = {
         return GameNumberMin(n, entity.owned.div(cost));
     },
 
-    // TODO
     maxAffordableLinear: function (entity, cost, n) {
-        throw new TypeError('getMaxAffordable() is unimplemented for ' + this.curve + ' curve');
+        var initial = entity.owned.plus(1).times(cost.times(this.multiplier));
+        return cost.times(n.times(cost).times(8).plus(initial.times(initial).times(4)).minus(initial.times(cost).times(4)).plus(cost.times(cost)).div(cost.times(cost)).sqrt()).minus(initial.times(2)).plus(cost).div(cost.times(2)).floor();
     },
 
     maxAffordableExponential: function (entity, cost, n) {
