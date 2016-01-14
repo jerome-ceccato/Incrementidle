@@ -20,3 +20,20 @@ function GameNumberMax(a, b) {
 function GameNumberLn(a) {
     return Decimal.log(a)
 }
+
+/////////////////
+
+var BuyAmount = {
+    create: function (n) {
+        return $.extend(Object.create(this), {
+            n: n,
+            unlimited: false
+        })
+    },
+
+    max: function () {
+        return $.extend(Object.create(this), {
+            unlimited: true
+        })
+    }
+};

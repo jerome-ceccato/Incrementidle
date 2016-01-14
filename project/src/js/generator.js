@@ -64,7 +64,7 @@ var Generator = {
     },
 
     maxAffordableFixed: function (entity, cost, n) {
-        return GameNumberMin(n, entity.owned.div(cost));
+        return n.div(cost).floor();
     },
 
     maxAffordableLinear: function (entity, cost, n) {

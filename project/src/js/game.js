@@ -140,6 +140,13 @@ var GameInternals = {
             costText.text(shouldReveal ? 'Cost: ' + entity.displayCost(engine.selectedBuyQuantity()) : null);
             amountText.text(shouldReveal ? entity.ownedDisplayString() : this.unavailableText);
             generatedText.text(shouldReveal ? entity.displayGenerated() : '');
+
+            if (!shouldReveal || entity.isUpgrade()) {
+                buyButton.text('Buy');
+            }
+            else {
+                buyButton.text('Buy ' + Formatter.number(GameNumberMax(GameNumber(1), entity.maxAffordableAmount(engine.selectedBuyQuantity()))));
+            }
         }
     }
 };

@@ -27,6 +27,10 @@ var GameEntity = {
         return this.race.locale.displayNameForKey(this.name, this.owned.greaterThan(1));
     },
 
+    hasCost: function () {
+        return this.cost && this.cost.length > 0;
+    },
+
     isVisible: function () {
         if (this.race.isEntityUnlocked(this)) {
             return true;
@@ -39,21 +43,23 @@ var GameEntity = {
         return false;
     },
 
-    canAfford: function (n) {
-        if (this.cost === undefined) {
+    canAfford: function (amount) {
+        if (!this.hasCost()) {
             return false;
         }
-        n = n === undefined ? GameNumber(1) : n;
-        return this.race.canAffordEntity(this, n);
+        if (amount === undefined || amount.unlimited) {
+            return this.race.canAffordEntity(this, GameNumber(1));
+        }
+        return this.race.canAffordEntity(this, amount.n);
     },
     
-    tryBuy: function (n) {
-        if (this.cost === undefined) {
+    tryBuy: function (amount) {
+        if (!this.hasCost()) {
             return false;
         }
-        if (n) {
-            if (this.canAfford(n)) {
-                this.verifiedBuy(n);
+        if (amount) {
+            if (this.canAfford(amount)) {
+                this.verifiedBuy(amount);
                 return true;
             }
             return false;
@@ -61,7 +67,24 @@ var GameEntity = {
         return false;
     },
 
-    verifiedBuy: function (n) {
+    maxAffordableAmount: function(amount) {
+        if (amount.unlimited) {
+            var total = undefined;
+            if (!this.hasCost()) {
+                return GameNumber(0);
+            }
+            for (var i = 0; i < this.cost.length; i++) {
+                var cost = this.cost[i];
+                var localMax = cost.getMaxAffordable(this.race, this);
+                total = (total === undefined) ? localMax : GameNumberMin(total, localMax);
+            }
+            return total.floor();
+        }
+        return amount.n.floor();
+    },
+
+    verifiedBuy: function (amount) {
+        var n = this.maxAffordableAmount(amount);
         for (var i = 0; i < this.cost.length; i++) {
             var cost = this.cost[i];
             var entity = this.race.getEntity(cost.getEntityIdentifier());
@@ -86,14 +109,18 @@ var GameEntity = {
         return this.race.getGeneratedAmountForEntityIdentifier(this.getIdentifier());
     },
 
+    isUpgrade: function () {
+        return false
+    },
+
     ////////////////////////////////////////////////////////
     /// DEBUG
     ////////////////////////////////////////////////////////
 
-    displayCost: function (n) {
-        if (this.cost && this.cost.length > 0) {
+    displayCost: function (amount) {
+        if (this.hasCost()) {
+            var n = GameNumberMax(GameNumber(1), this.maxAffordableAmount(amount));
             var content = '';
-            n = n === undefined ? GameNumber(1) : n;
             for (var i = 0; i < this.cost.length; i++) {
                 if (content.length > 0) {
                     content += ', ';
@@ -130,16 +157,20 @@ var GameUpgrade = $.extend(Object.create(GameEntity), {
     },
 
     canAfford: function () {
-        return this.unlocked ? false : GameEntity.canAfford.call(this, GameNumber(1));
+        return this.unlocked ? false : GameEntity.canAfford.call(this, BuyAmount.create(GameNumber(1)));
     },
 
     tryBuy: function () {
-        return this.unlocked ? false : GameEntity.tryBuy.call(this, GameNumber(1))
+        return this.unlocked ? false : GameEntity.tryBuy.call(this, BuyAmount.create(GameNumber(1)))
     },
 
     verifiedBuy: function () {
-        GameEntity.verifiedBuy.call(this, GameNumber(1));
+        GameEntity.verifiedBuy.call(this, BuyAmount.create(GameNumber(1)));
         this.unlocked = true;
+    },
+
+    isUpgrade: function () {
+        return true
     },
 
     ////////////////////////////////////////////////////////
@@ -147,7 +178,7 @@ var GameUpgrade = $.extend(Object.create(GameEntity), {
     ////////////////////////////////////////////////////////
 
     displayCost: function () {
-        return this.unlocked ? '-' : GameEntity.displayCost.call(this, GameNumber(1));
+        return this.unlocked ? '-' : GameEntity.displayCost.call(this, BuyAmount.create(GameNumber(1)));
     }
 });
 

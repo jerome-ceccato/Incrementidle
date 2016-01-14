@@ -30,6 +30,11 @@ var RelationCost = $.extend(Object.create(RelationBase), {
 
     getCostForEntities: function (entity, n) {
         return this.generator.getAmount(entity.owned, this.amount, n);
+    },
+
+    getMaxAffordable: function(race, entity) {
+        var resource = race.getEntity(this.getEntityIdentifier());
+        return this.generator.getMaxAffordable(entity, this.amount, resource.owned);
     }
 });
 

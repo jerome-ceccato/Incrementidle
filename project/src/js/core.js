@@ -2,7 +2,11 @@ var engine = {
     game: undefined,
 
     selectedBuyQuantity: function () {
-        return GameNumber($('#buyAmount').val());
+        var amount = $('#buyAmount').val();
+        if (amount == 'max') {
+            return BuyAmount.max();
+        }
+        return BuyAmount.create(GameNumber(amount));
     },
 
     start: function () {
