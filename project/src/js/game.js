@@ -15,7 +15,7 @@ var Game = {
 
     tick: function () {
         var elapsedTime = (new Date().getTime() - this.lastUpdate) / 1000.0;
-        this.race.tick(GameNumber(elapsedTime));
+        this.race.tick(elapsedTime);
         this.lastUpdate = new Date().getTime();
     },
 
@@ -30,12 +30,12 @@ var Game = {
 
     mainButtonPressed: function () {
         var entity = this.race.getEntity('seed');
-        entity.owned = entity.owned.add(1);
+        entity.owned += 1;
     },
 
     mainButton2Pressed: function () {
         var entity = this.race.getEntity($('#selectMore').val());
-        entity.owned = entity.owned.times(10);
+        entity.owned *= 10;
     }
 };
 
@@ -145,7 +145,7 @@ var GameInternals = {
                 buyButton.text('Buy');
             }
             else {
-                buyButton.text('Buy ' + Formatter.number(GameNumberMax(GameNumber(1), entity.maxAffordableAmount(engine.selectedBuyQuantity()))));
+                buyButton.text('Buy ' + Formatter.number(Math.max(1, entity.maxAffordableAmount(engine.selectedBuyQuantity()))));
             }
         }
     }

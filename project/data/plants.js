@@ -11,7 +11,7 @@ gameContent.plants = {
 			"type": "unit",
 			"cost": [{
 				"resource": "seed",
-				"amount": 1,
+				"amount": 1
 			}],
 
 			"generates": [{
@@ -207,7 +207,7 @@ gameContent.plants = {
 				"unit": "plantation",
 				"amount": 1
 			}]
-		},
+		}
 	},
 	"upgrades": {
 		"scienceInstitute": {

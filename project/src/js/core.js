@@ -6,7 +6,7 @@ var engine = {
         if (amount == 'max') {
             return BuyAmount.max();
         }
-        return BuyAmount.create(GameNumber(amount));
+        return BuyAmount.create(amount);
     },
 
     start: function () {

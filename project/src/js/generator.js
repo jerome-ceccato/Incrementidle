@@ -17,17 +17,17 @@ var Generator = {
             case 'exponential':
                 this.generate = this.generateExponential;
                 this.maxAffordable = this.maxAffordableExponential;
-                this.multiplier = this.multiplier || GameNumber(1.1);
+                this.multiplier = this.multiplier || 1.1;
                 break;
             case 'fixed':
                 this.generate = this.generateFixed;
                 this.maxAffordable = this.maxAffordableFixed;
-                this.multiplier = this.multiplier || GameNumber(1);
+                this.multiplier = this.multiplier || 1;
                 break;
             default:
                 this.generate = this.generateLinear;
                 this.maxAffordable = this.maxAffordableLinear;
-                this.multiplier = this.multiplier || GameNumber(1);
+                this.multiplier = this.multiplier || 1;
         }
         return this;
     },
@@ -37,26 +37,26 @@ var Generator = {
     },
 
     generateFixed: function (owned, cost, n) {
-        return cost.times(n);
+        return cost * n;
     },
 
     generateLinear: function (owned, cost, n) {
-        var normalizedCost = cost.times(this.multiplier);
-        var initial = owned.add(1).times(normalizedCost);
+        var normalizedCost = cost * this.multiplier;
+        var initial = (owned + 1) * normalizedCost;
 
-        if (n.equals(1)) {
+        if (n == 1) {
             return initial;
         }
-        return initial.times(n).add(n.sub(1).times(n).div(2).times(cost));
+        return (initial * n) + ((n - 1) * n / 2 * cost);
     },
     
     generateExponential: function (owned, cost, n) {
-        var initial = cost.times(this.multiplier.pow(owned));
+        var initial = cost * Math.pow(this.multiplier, owned);
 
-        if (n.equals(1)) {
+        if (n == 1) {
             return initial;
         }
-        return initial.times(this.multiplier.pow(n).sub(1).div(this.multiplier.sub(1)));
+        return initial * (Math.pow(this.multiplier, n) - 1) / (this.multiplier - 1);
     },
     
     getMaxAffordable: function (entity, cost, n) {
@@ -64,19 +64,19 @@ var Generator = {
     },
 
     maxAffordableFixed: function (entity, cost, n) {
-        return n.div(cost).floor();
+        return Math.floor(n / cost);
     },
 
     maxAffordableLinear: function (entity, cost, n) {
-        var initial = entity.owned.plus(1).times(cost.times(this.multiplier));
-        return cost.times(n.times(cost).times(8).plus(initial.times(initial).times(4)).minus(initial.times(cost).times(4)).plus(cost.times(cost)).div(cost.times(cost)).sqrt()).minus(initial.times(2)).plus(cost).div(cost.times(2)).floor();
+        var initial = (entity.owned + 1) * (cost * this.multiplier);
+        return Math.floor((cost * Math.sqrt(((n * cost * 8) + (initial * initial * 4) - (initial * cost * 4) + (cost * cost)) / (cost * cost)) - (initial * 2) + cost) / (cost * 2));
     },
 
     maxAffordableExponential: function (entity, cost, n) {
-        var initial = cost.times(this.multiplier.pow(entity.owned.floor()));
-        return GameNumberLn(GameNumber(n.div(initial).times(this.multiplier.sub(1)).add(1))).div(GameNumberLn(GameNumber(this.multiplier))).floor();
+        var initial = cost * Math.pow(this.multiplier, Math.floor(entity.owned));
+        return Math.floor(Math.log(n / initial * (this.multiplier - 1) + 1) / Math.log(this.multiplier));
     }
 };
 
-var defaultCostGenerator = Generator.create(GameNumber(1.1), 'exponential');
-var defaultGeneratesGenerator = Generator.create(GameNumber(1), 'fixed');
+var defaultCostGenerator = Generator.create(1.1, 'exponential');
+var defaultGeneratesGenerator = Generator.create(1, 'fixed');

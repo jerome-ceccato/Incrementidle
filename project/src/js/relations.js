@@ -7,7 +7,7 @@ var RelationBase = {
         return $.extend(Object.create(this), {
             type: type,
             key: key,
-            amount: GameNumber(amount || 1)
+            amount: amount || 1
         });
     },
 
@@ -25,7 +25,7 @@ var RelationCost = $.extend(Object.create(RelationBase), {
 
     validate: function (race, entity, n) {
         var resource = race.getEntity(this.getEntityIdentifier());
-        return resource.owned.greaterThanOrEqualTo(this.getCostForEntities(entity, n));
+        return resource.owned >= this.getCostForEntities(entity, n);
     },
 
     getCostForEntities: function (entity, n) {
@@ -47,9 +47,9 @@ var RelationGenerates = $.extend(Object.create(RelationBase), {
 
     getMaxGenerable: function (race, n) {
         // Only negative generation (fixed cost) can reach a maximum generable
-        if (this.amount.isNeg()) {
+        if (this.amount < 0) {
             var entity = race.getEntity(this.getEntityIdentifier());
-            return this.generator.getMaxAffordable(entity, this.amount.abs(), n);
+            return this.generator.getMaxAffordable(entity, Math.abs(this.amount), n);
         }
         return n;
     },
@@ -69,7 +69,7 @@ var RelationRequirement = $.extend(Object.create(RelationBase), {
 
     validate: function (race) {
         if (this.requirement == 'ownUnit' || this.requirement == 'ownResource' || this.requirement == 'ownBuilding') {
-            return race.getEntity(this.key).owned.greaterThanOrEqualTo(this.amount);
+            return race.getEntity(this.key).owned >= this.amount;
         }
         return false;
     }

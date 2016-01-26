@@ -3,7 +3,7 @@
  */
 
 var GameEntity = {
-    owned: GameNumber(0),
+    owned: 0,
     create: function (race, name, type, cost, generates, requirements) {
         return $.extend(Object.create(this), {
             race: race,
@@ -24,7 +24,7 @@ var GameEntity = {
     },
 
     displayString: function () {
-        return this.race.locale.displayNameForKey(this.name, this.owned.greaterThan(1));
+        return this.race.locale.displayNameForKey(this.name, this.owned > 1);
     },
 
     hasCost: function () {
@@ -35,7 +35,7 @@ var GameEntity = {
         if (this.race.isEntityUnlocked(this)) {
             return true;
         }
-        else if (this.owned.greaterThan(0)
+        else if (this.owned > 0
             || (this.requirements && this.race.meetsRequirements(this.requirements))) {
             this.race.unlockEntity(this);
             return true;
@@ -48,7 +48,7 @@ var GameEntity = {
             return false;
         }
         if (amount === undefined || amount.unlimited) {
-            return this.race.canAffordEntity(this, GameNumber(1));
+            return this.race.canAffordEntity(this, 1);
         }
         return this.race.canAffordEntity(this, amount.n);
     },
@@ -71,16 +71,16 @@ var GameEntity = {
         if (amount.unlimited) {
             var total = undefined;
             if (!this.hasCost()) {
-                return GameNumber(0);
+                return 0;
             }
             for (var i = 0; i < this.cost.length; i++) {
                 var cost = this.cost[i];
                 var localMax = cost.getMaxAffordable(this.race, this);
-                total = (total === undefined) ? localMax : GameNumberMin(total, localMax);
+                total = (total === undefined) ? localMax : Math.min(total, localMax);
             }
-            return total.floor();
+            return Math.floor(total);
         }
-        return amount.n.floor();
+        return Math.floor(amount.n);
     },
 
     verifiedBuy: function (amount) {
@@ -88,20 +88,20 @@ var GameEntity = {
         for (var i = 0; i < this.cost.length; i++) {
             var cost = this.cost[i];
             var entity = this.race.getEntity(cost.getEntityIdentifier());
-            entity.owned = entity.owned.sub(cost.getCostForEntities(this, n));
+            entity.owned -= cost.getCostForEntities(this, n);
         }
-        this.owned = this.owned.add(n);
+        this.owned += n;
     },
 
     canGenerateEntities: function () {
-        return this.generates !== undefined && this.generates.length > 0 && this.owned.greaterThan(0);
+        return this.generates !== undefined && this.generates.length > 0 && this.owned > 0;
     },
     
     verifiedGenerate: function (n) {
         for (var i = 0; i < this.generates.length; i++) {
             var generated = this.generates[i];
             var entity = this.race.getEntity(generated.getEntityIdentifier());
-            entity.owned = entity.owned.add(generated.getGeneratedAmountForEntities(this, n));
+            entity.owned += generated.getGeneratedAmountForEntities(this, n);
         }
     },
 
@@ -119,14 +119,14 @@ var GameEntity = {
 
     displayCost: function (amount) {
         if (this.hasCost()) {
-            var n = GameNumberMax(GameNumber(1), this.maxAffordableAmount(amount));
+            var n = Math.max(1, this.maxAffordableAmount(amount));
             var content = '';
             for (var i = 0; i < this.cost.length; i++) {
                 if (content.length > 0) {
                     content += ', ';
                 }
                 var totalCost = this.cost[i].getCostForEntities(this, n);
-                content += '' + Formatter.number(totalCost) + ' ' + this.race.locale.displayNameForKey(this.cost[i].getEntityIdentifier(), totalCost.greaterThan(1));
+                content += '' + Formatter.number(totalCost) + ' ' + this.race.locale.displayNameForKey(this.cost[i].getEntityIdentifier(), totalCost > 1);
             }
             return content;
         }
@@ -135,11 +135,11 @@ var GameEntity = {
 
     displayGenerated: function () {
         var generated = this.amountGeneratedPerTick();
-        if (generated === undefined || generated.equals(0)) {
+        if (generated === undefined || generated == 0) {
             return '';
         }
-        var generatedString = Formatter.number(generated.abs());
-        return '(' + (generated.isNeg() ? '-' : '+') + generatedString + '/sec)';
+        var generatedString = Formatter.number(Math.abs(generated));
+        return '(' + (generated < 0 ? '-' : '+') + generatedString + '/sec)';
     }
 };
 
@@ -157,15 +157,15 @@ var GameUpgrade = $.extend(Object.create(GameEntity), {
     },
 
     canAfford: function () {
-        return this.unlocked ? false : GameEntity.canAfford.call(this, BuyAmount.create(GameNumber(1)));
+        return this.unlocked ? false : GameEntity.canAfford.call(this, BuyAmount.create(1));
     },
 
     tryBuy: function () {
-        return this.unlocked ? false : GameEntity.tryBuy.call(this, BuyAmount.create(GameNumber(1)))
+        return this.unlocked ? false : GameEntity.tryBuy.call(this, BuyAmount.create(1))
     },
 
     verifiedBuy: function () {
-        GameEntity.verifiedBuy.call(this, BuyAmount.create(GameNumber(1)));
+        GameEntity.verifiedBuy.call(this, BuyAmount.create(1));
         this.unlocked = true;
     },
 
@@ -178,7 +178,7 @@ var GameUpgrade = $.extend(Object.create(GameEntity), {
     ////////////////////////////////////////////////////////
 
     displayCost: function () {
-        return this.unlocked ? '-' : GameEntity.displayCost.call(this, BuyAmount.create(GameNumber(1)));
+        return this.unlocked ? '-' : GameEntity.displayCost.call(this, BuyAmount.create(1));
     }
 });
 

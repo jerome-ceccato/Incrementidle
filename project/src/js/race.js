@@ -65,11 +65,11 @@ var GameRace = {
         var self = this;
         GameRaceInternals.foreachEntity(this, function (entity) {
             if (entity.canGenerateEntities()) {
-                var maxAffordable = n.times(entity.owned);
+                var maxAffordable = n * entity.owned;
                 for (var i = 0; i < entity.generates.length; i++) {
-                    maxAffordable = GameNumberMax(maxAffordable, entity.generates[i].getMaxGenerable(self, maxAffordable));
+                    maxAffordable = Math.max(maxAffordable, entity.generates[i].getMaxGenerable(self, maxAffordable));
                 }
-                if (maxAffordable.greaterThan(0)) {
+                if (maxAffordable > 0) {
                     entity.verifiedGenerate(maxAffordable);
                 }
             }
@@ -180,8 +180,8 @@ var GameRaceInternals = {
             if (entity.canGenerateEntities()) {
                 for (var i = 0; i < entity.generates.length; i++) {
                     var generator = entity.generates[i];
-                    var base = cache[generator.getEntityIdentifier()] || GameNumber(0);
-                    cache[generator.getEntityIdentifier()] = base.add(generator.getGeneratedAmountForEntities(entity, entity.owned));
+                    var base = cache[generator.getEntityIdentifier()] || 0;
+                    cache[generator.getEntityIdentifier()] = base + generator.getGeneratedAmountForEntities(entity, entity.owned);
                 }
             }
         });
