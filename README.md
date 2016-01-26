@@ -36,3 +36,4 @@ http://orteil.dashnet.org/cookieclicker/main.js?v=1.792
 
 http://cirri.al/sharks/
 
+https://github.com/ardama/Chime-Clicker
