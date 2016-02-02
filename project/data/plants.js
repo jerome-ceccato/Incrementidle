@@ -10,18 +10,18 @@ gameContent.plants = {
 		"plant": {
 			"type": "unit",
 			"cost": [{
-				"resource": "seed",
+				"entity": "seed",
 				"amount": 1
 			}],
 
-			"generates": [{
-				"resource": "seed",
+			"generate": [{
+				"entity": "seed",
 				"amount": 0.1
 			}],
 
-            "preReq": [{
-                "type": "ownResource",
-                "resource": "seed",
+            "require": [{
+                "type": "own",
+                "entity": "seed",
                 "amount": 1
             }]
 		},
@@ -29,18 +29,18 @@ gameContent.plants = {
 		"root": {
 			"type": "unit",
 			"cost": [{
-				"resource": "seed",
+				"entity": "seed",
 				"amount": 1
 			}],
 
-			"generates": [{
-				"resource": "nutriment",
+			"generate": [{
+				"entity": "nutriment",
 				"amount": 1
 			}],
 
-			"preReq": [{
-				"type": "ownUnit",
-				"unit": "plant",
+			"require": [{
+				"type": "own",
+				"entity": "plant",
 				"amount": 1
 			}]
 		},
@@ -48,21 +48,21 @@ gameContent.plants = {
 		"fern": {
 			"type": "unit",
 			"cost": [{
-				"resource": "seed",
+				"entity": "seed",
 				"amount": 1
 			}, {
-				"resource": "nutriment",
+				"entity": "nutriment",
 				"amount": 20
 			}],
 
-			"generates": [{
-				"resource": "water",
+			"generate": [{
+				"entity": "water",
 				"amount": 1
 			}],
 
-			"preReq": [{
-				"type": "ownUnit",
-				"unit": "root",
+			"require": [{
+				"type": "own",
+				"entity": "root",
 				"amount": 2
 			}]
 		},
@@ -70,38 +70,40 @@ gameContent.plants = {
 		"plantation": {
 			"type": "building",
 			"cost": [{
-				"unit": "plant",
+				"entity": "plant",
 				"amount": 10,
 				"curve": "fixed"
 			}, {
-				"resource": "nutriment",
+				"entity": "nutriment",
 				"amount": 100,
 				"multiplier": 1.3
 			}, {
-				"resource": "water",
+				"entity": "water",
 				"amount": 100,
 				"multiplier": 1.3
 			}],
 
-			"generates": [{
-				"unit": "plant",
-				"amount": 1
-			}, {
-				"resource": "seed",
-				"amount": -1
+			"affect": [{
+				"entity": "plant",
+				"type": "generate",
+				"subentity": undefined,
+				"amount": 0.1,
+				"action": "base_multiplier"
+				//"base_increment"
+				//"total_multiplier"
 			}],
 
-			"preReq": [{
-				"type": "ownUnit",
-				"unit": "root",
+			"require": [{
+				"type": "own",
+				"entity": "root",
 				"amount": 10
 			}, {
-				"type": "ownUnit",
-				"unit": "fern",
+				"type": "own",
+				"entity": "fern",
 				"amount": 10
 			}, {
-				"type": "ownUnit",
-				"unit": "plant",
+				"type": "own",
+				"entity": "plant",
 				"amount": 50
 			}]
 		},
@@ -109,37 +111,37 @@ gameContent.plants = {
 		"tree": {
 			"type": "building",
 			"cost": [{
-				"resource": "seed",
+				"entity": "seed",
 				"amount": 1
 			}, {
-				"resource": "nutriment",
+				"entity": "nutriment",
 				"amount": 500,
 				"multiplier": 1.2
 			}, {
-				"resource": "water",
+				"entity": "water",
 				"amount": 100,
 				"multiplier": 1.2
 			}],
 
-			"generates": [{
-				"unit": "root",
+			"generate": [{
+				"entity": "root",
 				"amount": 1
 			}, {
-				"resource": "seed",
+				"entity": "seed",
 				"amount": -1
 			}],
 
-			"preReq": [{
-				"type": "ownUnit",
-				"unit": "root",
+			"require": [{
+				"type": "own",
+				"entity": "root",
 				"amount": 50
 			}, {
-				"type": "ownUnit",
-				"unit": "fern",
+				"type": "own",
+				"entity": "fern",
 				"amount": 10
 			}, {
-				"type": "ownUnit",
-				"unit": "plant",
+				"type": "own",
+				"entity": "plant",
 				"amount": 10
 			}]
 		},
@@ -147,37 +149,37 @@ gameContent.plants = {
 		"swamp": {
 			"type": "building",
 			"cost": [{
-				"resource": "seed",
+				"entity": "seed",
 				"amount": 1
 			}, {
-				"resource": "nutriment",
+				"entity": "nutriment",
 				"amount": 100,
 				"multiplier": 1.2
 			}, {
-				"resource": "water",
+				"entity": "water",
 				"amount": 500,
 				"multiplier": 1.2
 			}],
 
-			"generates": [{
-				"unit": "fern",
+			"generate": [{
+				"entity": "fern",
 				"amount": 1
 			}, {
-				"resource": "seed",
+				"entity": "seed",
 				"amount": -1
 			}],
 
-			"preReq": [{
-				"type": "ownUnit",
-				"unit": "root",
+			"require": [{
+				"type": "own",
+				"entity": "root",
 				"amount": 10
 			}, {
-				"type": "ownUnit",
-				"unit": "fern",
+				"type": "own",
+				"entity": "fern",
 				"amount": 50
 			}, {
-				"type": "ownUnit",
-				"unit": "plant",
+				"type": "own",
+				"entity": "plant",
 				"amount": 10
 			}]
 		},
@@ -185,26 +187,26 @@ gameContent.plants = {
 		"ivy": {
 			"type": "unit",
 			"cost": [{
-				"resource": "seed",
+				"entity": "seed",
 				"amount": 100
 			}],
 
-			"generates": [{
-				"resource": "discovery",
+			"generate": [{
+				"entity": "discovery",
 				"amount": 1
 			}],
 
-			"preReq": [{
-				"type": "ownUnit",
-				"unit": "tree",
+			"require": [{
+				"type": "own",
+				"entity": "tree",
 				"amount": 1
 			}, {
-				"type": "ownUnit",
-				"unit": "swamp",
+				"type": "own",
+				"entity": "swamp",
 				"amount": 1
 			}, {
-				"type": "ownUnit",
-				"unit": "plantation",
+				"type": "own",
+				"entity": "plantation",
 				"amount": 1
 			}]
 		}
@@ -213,15 +215,15 @@ gameContent.plants = {
 		"scienceInstitute": {
 			"type": "once",
 			"cost": [{
-				"resource": "discovery",
+				"entity": "discovery",
 				"amount": 1000
 			}, {
-				"unit": "tree",
+				"entity": "tree",
 				"amount": 1
 			}],
-			"preReq": [{
-				"type": "ownUnit",
-				"unit": "ivy",
+			"require": [{
+				"type": "own",
+				"entity": "ivy",
 				"amount": 1
 			}]
 		}

@@ -95,34 +95,42 @@ var GameRaceInternals = {
         }
     },
 
+
     pushContentInArray: function (race, array, contentKey, baseObject) {
         for (var key in race.content[contentKey]) {
             if (race.content[contentKey].hasOwnProperty(key)) {
                 var object = race.content[contentKey][key];
                 array.push(baseObject.create(race, key, object.type,
                     this.parseCost(object.cost),
-                    this.parseGenerates(object.generates),
-                    this.parseRequirements(object.preReq)));
+                    this.parseGenerates(object.generate),
+                    this.parseRequirements(object.require),
+                    this.parseAffects(object.affect)));
             }
         }
     },
 
     parseCost: function (object) {
-        return this.parseResourceRequirement(object, function (object, type, key) {
-            return RelationCost.create(type, key, object.amount, GameRaceInternals.parseGenerator(object));
+        return this.parseResourceRequirement(object, function (object, key) {
+            return RelationCost.create(key, object.amount, GameRaceInternals.parseGenerator(object));
         });
     },
 
     parseGenerates: function (object) {
-        return this.parseResourceRequirement(object, function (object, type, key) {
-            return RelationGenerates.create(type, key, object.amount, GameRaceInternals.parseGenerator(object));
+        return this.parseResourceRequirement(object, function (object, key) {
+            return RelationGenerates.create(key, object.amount, GameRaceInternals.parseGenerator(object));
         });
     },
 
     parseRequirements: function (object) {
-        // Rewrite to support more than 'ownUnit'
-        return this.parseResourceRequirement(object, function (object, type, key) {
-            return RelationRequirement.create(object.type, type, key, object.amount, GameRaceInternals.parseGenerator(object));
+        // Rewrite to support more than 'own'
+        return this.parseResourceRequirement(object, function (object, key) {
+            return RelationRequirement.create(object.type, key, object.amount);
+        });
+    },
+
+    parseAffects: function (object) {
+        return this.parseResourceRequirement(object, function (object, key) {
+            return RelationAffects.create(key, object.amount, object.subentity, object.type, object.action);
         });
     },
 
@@ -130,32 +138,11 @@ var GameRaceInternals = {
         if (object) {
             var array = [];
             for (var i = 0; i < object.length; i++) {
-                var tuple = this.parseTypeAndKey(object[i]),
-                    type = tuple[0],
-                    key = tuple[1];
-                array.push(generateOne(object[i], type, key));
+                array.push(generateOne(object[i], object[i].entity));
             }
             return array;
         }
         return undefined;
-    },
-
-    parseTypeAndKey: function (object) {
-        var type = undefined,
-            key = undefined;
-        if (object.resource) {
-            type = 'resource';
-            key = object.resource;
-        }
-        else if (object.unit) {
-            type = 'unit';
-            key = object.unit;
-        }
-        else if (object.building) {
-            type = 'building';
-            key = object.building;
-        }
-        return [type, key];
     },
 
     parseGenerator: function (object) {

@@ -4,14 +4,15 @@
 
 var GameEntity = {
     owned: 0,
-    create: function (race, name, type, cost, generates, requirements) {
+    create: function (race, name, type, cost, generates, requirements, affects) {
         return $.extend(Object.create(this), {
             race: race,
             name: name,
             type: type,
             cost: cost,
             generates: generates,
-            requirements: requirements
+            requirements: requirements,
+            affects: affects
         });
     },
 
