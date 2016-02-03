@@ -94,8 +94,12 @@ var GameEntity = {
         this.owned += n;
     },
 
+    generatesEntities: function () {
+        return this.generates !== undefined && this.generates.length > 0;
+    },
+
     canGenerateEntities: function () {
-        return this.generates !== undefined && this.generates.length > 0 && this.owned > 0;
+        return  this.generatesEntities() && this.owned > 0;
     },
     
     verifiedGenerate: function (n) {
@@ -107,11 +111,22 @@ var GameEntity = {
     },
 
     amountGeneratedPerTick: function () {
-        return this.race.getGeneratedAmountForEntityIdentifier(this.getIdentifier());
+        var total = 0;
+        if (this.generatedBy !== undefined && this.generatedBy.length > 0) {
+            for (var i = 0; i < this.generatedBy.length; i++) {
+                var gen = this.generatedBy[i];
+                total += gen.link.getGeneratedAmountForEntities(gen.entity, gen.entity.owned)
+            }
+        }
+        return total;
     },
 
     isUpgrade: function () {
         return false
+    },
+
+    affectsEntities: function () {
+        return this.affects && this.affects.length > 0;
     },
 
     ////////////////////////////////////////////////////////

@@ -65,19 +65,6 @@ var RelationAffects = $.extend(Object.create(RelationBase), {
             type: type,
             action: action
         });
-    },
-
-    getMaxGenerable: function (race, n) {
-        // Only negative generation (fixed cost) can reach a maximum generable
-        if (this.amount < 0) {
-            var entity = race.getEntity(this.getEntityIdentifier());
-            return this.generator.getMaxAffordable(entity, Math.abs(this.amount), n);
-        }
-        return n;
-    },
-
-    getGeneratedAmountForEntities: function (entity, n) {
-        return this.generator.getAmount(entity.owned, this.amount, n);
     }
 });
 

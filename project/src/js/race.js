@@ -4,7 +4,6 @@ var GameRace = {
     upgrades: [],
 
     entitiesLookupTable: {},
-	entitiesGeneratedAmountCache: {},
 
     create: function (name, content) {
         return $.extend(Object.create(this), {
@@ -20,16 +19,14 @@ var GameRace = {
         GameRaceInternals.pushContentInArray(this, this.upgrades, 'upgrades', GameUpgrade);
         GameRaceInternals.indexEntities(this.entitiesLookupTable, this.resources, this.units, this.upgrades);
 
+        Cache.buildEntitiesGeneratedRelationCache(this);
+        Cache.buildAffectedEntitiesRelationCache(this);
         return this;
     },
 
     // Access
     getEntity: function (key) {
         return this.entitiesLookupTable[key];
-    },
-
-    getGeneratedAmountForEntityIdentifier: function (key) {
-        return this.entitiesGeneratedAmountCache[key];
     },
 
     // Entity unlocking
@@ -79,10 +76,6 @@ var GameRace = {
     // Game loop
     tick: function (n) {
 		this.generateEntities(n);
-	},
-	
-	prepareForDisplay: function () {
-        this.entitiesGeneratedAmountCache = GameRaceInternals.buildEntitiesGeneratedAmountCache(this);
 	}
 };
 
@@ -159,19 +152,5 @@ var GameRaceInternals = {
                 table[entity.getIdentifier()] = entity;
             }
         }
-    },
-    
-    buildEntitiesGeneratedAmountCache: function (race) {
-        var cache = {};
-        this.foreachEntity(race, function (entity) {
-            if (entity.canGenerateEntities()) {
-                for (var i = 0; i < entity.generates.length; i++) {
-                    var generator = entity.generates[i];
-                    var base = cache[generator.getEntityIdentifier()] || 0;
-                    cache[generator.getEntityIdentifier()] = base + generator.getGeneratedAmountForEntities(entity, entity.owned);
-                }
-            }
-        });
-        return cache;
     }
 };

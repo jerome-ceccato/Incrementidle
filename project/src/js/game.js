@@ -20,7 +20,6 @@ var Game = {
     },
 
     refresh: function () {
-        this.race.prepareForDisplay();
         GameInternals.refreshTables(this.race);
     },
 
