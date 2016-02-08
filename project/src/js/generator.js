@@ -5,6 +5,7 @@
 var Generator = {
     generate: undefined,
     maxAffordable: undefined,
+
     create: function (multiplier, curve) {
         return $.extend(Object.create(this), {
             multiplier: multiplier,
@@ -29,18 +30,29 @@ var Generator = {
                 this.maxAffordable = this.maxAffordableLinear;
                 this.multiplier = this.multiplier || 1;
         }
+        this.cleanup();
         return this;
     },
+
+    cleanup: function () {
+        this.baseIncrement = 0;
+        this.baseMultiplier = 1;
+        this.totalMultiplier = 1;
+    },
+
+    // TODO : apply total multiplier to linerar and exponential functions
 
     getAmount: function (owned, cost, n) {
         return this.generate(owned, cost, n);
     },
 
     generateFixed: function (owned, cost, n) {
-        return cost * n;
+        cost = (cost + this.baseIncrement) * this.baseMultiplier;
+        return cost * n * this.totalMultiplier;
     },
 
     generateLinear: function (owned, cost, n) {
+        cost = (cost + this.baseIncrement) * this.baseMultiplier;
         var normalizedCost = cost * this.multiplier;
         var initial = (owned + 1) * normalizedCost;
 
@@ -51,6 +63,7 @@ var Generator = {
     },
     
     generateExponential: function (owned, cost, n) {
+        cost = (cost + this.baseIncrement) * this.baseMultiplier;
         var initial = cost * Math.pow(this.multiplier, owned);
 
         if (n == 1) {
@@ -64,15 +77,18 @@ var Generator = {
     },
 
     maxAffordableFixed: function (entity, cost, n) {
-        return Math.floor(n / cost);
+        cost = (cost + this.baseIncrement) * this.baseMultiplier;
+        return Math.floor(n / cost * this.totalMultiplier);
     },
 
     maxAffordableLinear: function (entity, cost, n) {
+        cost = (cost + this.baseIncrement) * this.baseMultiplier;
         var initial = (entity.owned + 1) * (cost * this.multiplier);
         return Math.floor((cost * Math.sqrt(((n * cost * 8) + (initial * initial * 4) - (initial * cost * 4) + (cost * cost)) / (cost * cost)) - (initial * 2) + cost) / (cost * 2));
     },
 
     maxAffordableExponential: function (entity, cost, n) {
+        cost = (cost + this.baseIncrement) * this.baseMultiplier;
         var initial = cost * Math.pow(this.multiplier, Math.floor(entity.owned));
         return Math.floor(Math.log(n / initial * (this.multiplier - 1) + 1) / Math.log(this.multiplier));
     }

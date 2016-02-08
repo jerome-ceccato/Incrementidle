@@ -12,6 +12,29 @@ var RelationBase = {
 
     getEntityIdentifier: function () {
         return this.key;
+    },
+    
+    getGenerator: function () {
+        this.generator.cleanup();
+        if (this.affectedBy !== undefined && this.affectedBy.length > 0) {
+            var baseIncrement = 0,
+                baseMultiplier = 1,
+                totalMultiplier = 1;
+            for (var i = 0; i < this.affectedBy.length; i++) {
+                if (this.affectedBy[i].entity.owned > 0) {
+                    var amount = this.affectedBy[i].link.amount * this.affectedBy[i].entity.owned;
+                    switch (this.affectedBy[i].link.action) {
+                        case 'base_multiplier': baseMultiplier += amount; break;
+                        case 'base_increment': baseIncrement += amount; break;
+                        case 'total_multiplier': totalMultiplier += amount; break;
+                    }
+                }
+            }
+            this.generator.baseIncrement = baseIncrement;
+            this.generator.baseMultiplier = baseMultiplier;
+            this.generator.totalMultiplier = totalMultiplier;
+        }
+        return this.generator
     }
 };
 
@@ -28,12 +51,12 @@ var RelationCost = $.extend(Object.create(RelationBase), {
     },
 
     getCostForEntities: function (entity, n) {
-        return this.generator.getAmount(entity.owned, this.amount, n);
+        return this.getGenerator().getAmount(entity.owned, this.amount, n);
     },
 
     getMaxAffordable: function(race, entity) {
         var resource = race.getEntity(this.getEntityIdentifier());
-        return this.generator.getMaxAffordable(entity, this.amount, resource.owned);
+        return this.getGenerator().getMaxAffordable(entity, this.amount, resource.owned);
     }
 });
 
@@ -48,13 +71,13 @@ var RelationGenerates = $.extend(Object.create(RelationBase), {
         // Only negative generation (fixed cost) can reach a maximum generable
         if (this.amount < 0) {
             var entity = race.getEntity(this.getEntityIdentifier());
-            return this.generator.getMaxAffordable(entity, Math.abs(this.amount), n);
+            return this.getGenerator().getMaxAffordable(entity, Math.abs(this.amount), n);
         }
         return n;
     },
 
     getGeneratedAmountForEntities: function (entity, n) {
-        return this.generator.getAmount(entity.owned, this.amount, n);
+        return this.getGenerator().getAmount(entity.owned, this.amount, n);
     }
 });
 

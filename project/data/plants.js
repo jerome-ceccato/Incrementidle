@@ -16,7 +16,7 @@ gameContent.plants = {
 
 			"generate": [{
 				"entity": "seed",
-				"amount": 0.1
+				"amount": 1
 			}],
 
             "require": [{
@@ -70,10 +70,6 @@ gameContent.plants = {
 		"plantation": {
 			"type": "building",
 			"cost": [{
-				"entity": "plant",
-				"amount": 10,
-				"curve": "fixed"
-			}, {
 				"entity": "nutriment",
 				"amount": 100,
 				"multiplier": 1.3
@@ -88,7 +84,7 @@ gameContent.plants = {
 				"type": "generate",
 				"subentity": undefined,
 				"amount": 0.1,
-				"action": "base_multiplier"
+				"action": "total_multiplier"
 				//"base_increment"
 				//"total_multiplier"
 			}],

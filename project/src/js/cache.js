@@ -26,14 +26,21 @@ var Cache = {
             }
         });
     },
-    
+
+    subarrayForType: function (type, entity) {
+        if (type == 'generate') {
+            type = 'generates'
+        }
+        return entity[type]
+    },
+
     buildAffectedEntitiesRelationCache: function (race) {
         GameRaceInternals.foreachEntity(race, function (entity) {
             if (entity.affectsEntities()) {
                 for (var i = 0; i < entity.affects.length; i++) {
                     var effect = entity.affects[i];
                     var targetEntity = race.getEntity(effect.getEntityIdentifier());
-                    var subarray = targetEntity[effect.type];
+                    var subarray = Cache.subarrayForType(effect.type, targetEntity);
                     if (subarray) {
                         for (var j = 0; j < subarray.length; j++) {
                             var relation = subarray[j];
